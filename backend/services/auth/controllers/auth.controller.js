@@ -171,7 +171,7 @@ export const googleLogin = async(req,res)=>{
 
             name:user.name,
             email:user.email,
-            userId:user._id,
+            _id:user._id,
             avatar:user.avatar
 
         }),"EX",7*24*60*60)

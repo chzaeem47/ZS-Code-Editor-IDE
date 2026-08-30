@@ -6,8 +6,21 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
+import { me } from "./features/me.js";
+import { useDispatch } from "react-redux";
+import { setUserData } from "./redux/slices/authSlice.js";
 
 const App = () => {
+  const dispatch = useDispatch()
+  useEffect(()=>{
+    const fetch = async()=>{
+      const data = await me()
+      dispatch(setUserData(data))
+    }
+    fetch()
+  },[])
+
   return (
     <ThemeProvider>
       <BrowserRouter>

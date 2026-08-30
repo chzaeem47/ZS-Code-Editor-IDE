@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
+import { protect } from "./middlewares/protect.js";
+import { getCurrUser } from "./controllers/user.controller.js";
 
 
 const app = express();
@@ -40,6 +42,8 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/auth", authRoutes);
+
+app.get('/me',protect,getCurrUser)
 
 
 app.use((error, req, res, next) => {

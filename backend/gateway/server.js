@@ -30,6 +30,15 @@ app.use(
     })
 );
 
+app.use(
+    "/api/me",
+    proxy(process.env.AUTH_SERVICE, {
+        proxyReqPathResolver: () => {
+            return "/me";
+        },
+    })
+);
+
 app.listen(port, () => {
     console.log(`Server is Running on Port ${port}`);
 });
