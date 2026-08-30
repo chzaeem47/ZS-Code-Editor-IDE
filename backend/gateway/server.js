@@ -4,6 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import proxy from "express-http-proxy";
+import {protect} from '../services/auth/middlewares/protect.js'
+import { proxyWithHeader } from "../shared/proxyWIthHeader.js";
 
 dotenv.config();
 
@@ -38,6 +40,8 @@ app.use(
         },
     })
 );
+
+app.use('/api/project' ,protect,proxyWithHeader(process.env.PROJECT_SERVICE))
 
 app.listen(port, () => {
     console.log(`Server is Running on Port ${port}`);

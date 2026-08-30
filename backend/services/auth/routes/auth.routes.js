@@ -19,6 +19,9 @@ router.post("/login", loginRateLimiter, validate(loginSchema), login);
 /**
 * - /api/auth/google
 */
-router.post("/google", googleLogin); // <--- THIS WAS MISSING
+router.post("/google", googleLogin);
+
+router.get('/logout',logout)
+
 
 export default router;

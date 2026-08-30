@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "express-http-proxy": "^2.1.2",
     "ioredis": "^6.0.0"
   }
 }
