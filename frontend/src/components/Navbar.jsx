@@ -36,7 +36,7 @@ const Navbar = () => {
 
     return (
         <nav className="fixed left-0 right-0 top-0 z-50">
-            <div className={`mx-auto flex h-[50px] max-w-[1800px] items-center justify-between border-b px-4 shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-all duration-500 sm:px-5 ${isDark ? "border-slate-800/80 bg-slate-900/90" : "border-black/10 bg-white/70"}`}>
+            <div className={`mx-auto flex h-[50px] max-w-[1520px] rounded-2xl translate-y-2 items-center justify-between border-b px-4 backdrop-blur-3xl effect-less transition-all duration-500 sm:px-5 ${isDark ? "border-slate-800/80 bg-slate-900/90" : "border-black/10 bg-white/70"}`}>
 
                 {/* LOGO */}
                 <button type="button" onClick={() => navigate("/")} className="flex items-center w-10">
@@ -47,7 +47,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-2 sm:gap-3">
 
                     {/* THEME */}
-                    <button type="button" onClick={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} className={`effect-3d flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-9 sm:w-9 ${isDark ? "border-white bg-black/10 text-cyan-400 hover:bg-white/20" : "border-black/10 bg-black/5 text-yellow-500 hover:bg-black/10"}`}>
+                    <button type="button" onClick={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} className={`effect-less flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 sm:h-9 sm:w-9 ${isDark ? "border-white bg-black/10 text-cyan-400 hover:bg-white/20" : "border-black/10 bg-black/5 text-yellow-500 hover:bg-black/10"}`}>
                         {isDark ? <FaMoon className="text-[19px]" /> : <FaSun className="text-[19px]" />}
                     </button>
 

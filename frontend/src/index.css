@@ -13,7 +13,7 @@
 
 @layer utilities {
   .effect-3d {
-    @apply border border-white/40 backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:active:scale-[0.98]
+    @apply border border-white/40 backdrop-blur-md transition-all duration-300
            /* Layer 1: Crisp, thin white highlight line at the very top edge */
            /* Layer 2: Subtle white highlight trailing on the left edge */
            /* Layer 3: Tight dark depth curve at the bottom edge */
@@ -23,7 +23,17 @@
   }
 }
 
-
+@layer utilities {
+  .effect-less {
+    @apply border border-white/40 backdrop-blur-md transition-all duration-300
+           /* Layer 1: Crisp, thin white highlight line at the very top edge */
+           /* Layer 2: Subtle white highlight trailing on the left edge */
+           /* Layer 3: Tight dark depth curve at the bottom edge */
+           /* Layer 4: Thin inner reflection line pooling at the absolute bottom */
+           /* Layer 5: Soft ambient drop shadow to ground the button */
+           shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),inset_2px_1px_2px_rgba(255,255,255,0.2),inset_0_0px_5px_rgba(0,0,0,0.45),inset_0_-2px_2px_rgba(255,255,255,0.25),0_10px_20px_-20px_rgba(0,0,0,0.3)];
+  }
+}
 
 
 

@@ -31,7 +31,7 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
         </Routes>
 
-        <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnHover draggable theme="colored" />
+        <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnHover draggable theme="colored" />
       </BrowserRouter>
     </ThemeProvider>
   );
