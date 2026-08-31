@@ -41,7 +41,11 @@ app.use(
     })
 );
 
-app.use('/api/project' ,protect,proxyWithHeader(process.env.PROJECT_SERVICE))
+app.use(
+    "/api/project",
+    protect,
+    proxyWithHeader(process.env.PROJECT_SERVICE)
+);
 
 app.listen(port, () => {
     console.log(`Server is Running on Port ${port}`);
