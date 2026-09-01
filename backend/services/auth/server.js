@@ -13,7 +13,7 @@ import { getCurrUser } from "./controllers/user.controller.js";
 
 const app = express();
 
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3001;
 
 app.set("trust proxy", 1); //to trust first reverse proxy sitting directly in front of it
 
