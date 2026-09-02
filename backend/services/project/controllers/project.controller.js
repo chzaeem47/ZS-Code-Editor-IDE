@@ -1,9 +1,7 @@
 import { projectModel } from "../models/project.model.js";
 import { redis } from "../../../shared/redis/redis.js";
 
-// ==========================================
-// CREATE PROJECT
-// ==========================================
+
 export const createProject = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
@@ -57,9 +55,6 @@ export const createProject = async (req, res) => {
 };
 
 
-// ==========================================
-// GET ALL PROJECTS
-// ==========================================
 export const getProjects = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
@@ -105,10 +100,6 @@ export const getProjects = async (req, res) => {
     }
 };
 
-
-// ==========================================
-// GET PROJECT BY ID
-// ==========================================
 export const getProjectById = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
@@ -149,9 +140,6 @@ export const getProjectById = async (req, res) => {
 };
 
 
-// ==========================================
-// GET STARRED PROJECTS
-// ==========================================
 export const getStarredProjects = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
@@ -199,9 +187,6 @@ export const getStarredProjects = async (req, res) => {
 };
 
 
-// ==========================================
-// TOGGLE STAR
-// ==========================================
 export const toggleStar = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
@@ -245,9 +230,6 @@ export const toggleStar = async (req, res) => {
 };
 
 
-// ==========================================
-// DELETE PROJECT
-// ==========================================
 export const deleteProject = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
