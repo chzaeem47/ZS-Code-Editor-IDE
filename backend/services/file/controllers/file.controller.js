@@ -1,6 +1,7 @@
 import { fileModel } from "../models/file.model.js"
+import { buildTree } from "../utils/buildTree.js"
 
-const createRootFolder = async(req,res)=>{
+export const createRootFolder = async(req,res)=>{
 
     try {
         const {projectId,projectName} = req.body
@@ -28,14 +29,14 @@ const createRootFolder = async(req,res)=>{
             parentId:null
         })
 
-        return res.status(201).json({rootFolder})
+        return res.status(201).json(rootFolder)
     } catch (error) {
         return res.status(500).json({message : `Creating Root Folder Error ${error}`})
     }
 }
 
 
-const createFolder = async(req,res)=>{
+export const createFolder = async(req,res)=>{
 
     try {
         const {projectId,name,parentId} = req.body
@@ -64,14 +65,14 @@ const createFolder = async(req,res)=>{
             parentId
         })
 
-        return res.status(201).json({folder})
+        return res.status(201).json(folder)
     } catch (error) {
         return res.status(500).json({message : `Create Folder Error ${error}`})
     }
 }
 
 
-const createFile = async(req,res)=>{
+export const createFile = async(req,res)=>{
 
     try {
         const {projectId,name,parentId,content="",language="plaintext"} = req.body
@@ -106,14 +107,14 @@ const createFile = async(req,res)=>{
             parentId:parentId || null
         })
 
-        return res.status(201).json({file})
+        return res.status(201).json(file)
     } catch (error) {
         return res.status(500).json({message : `Create File Error ${error}`})
     }
 }
 
 
-const updateFile = async(req,res)=>{
+export const updateFile = async(req,res)=>{
 
     try {
         const {projectId,name,parentId,content="",language="plaintext"} = req.body
@@ -141,13 +142,13 @@ const updateFile = async(req,res)=>{
 
         await file.save()
 
-        return res.status(201).json({file})
+        return res.status(200).json(file)
     } catch (error) {
         return res.status(500).json({message : `Update File Error ${error}`})
     }
 }
 
-const deleteFile = async(req,res)=>{
+export const deleteFile = async(req,res)=>{
 
     try {
         const userId = req.headers['x-user-id']
@@ -156,8 +157,56 @@ const deleteFile = async(req,res)=>{
             isDeleted:true
         })
 
-        return res.status(201).json({file})
+        return res.status(200).json(file)
     } catch (error) {
         return res.status(500).json({message : `Delete File Error ${error}`})
+    }
+}
+
+
+export const getFile = async(req,res)=>{
+
+    try {
+        const userId = req.headers['x-user-id']
+
+        const file = await fileModel.findOne({
+            _id:req.params.id,
+            owner:userId,
+            isDeleted:false
+        })
+
+        if(!file){
+            return res.status(401).json({message : "File Not Found"})
+        }
+
+        return res.status(200).json(file)
+
+    } catch (error) {
+        return res.status(500).json({message : `Delete File Error ${error}`})
+    }
+}
+
+
+export const getTree = async(req,res)=>{
+
+    try {
+        const userId = req.headers['x-user-id']
+        const {projectId} = req.params
+
+        const files = await fileModel.findOne({
+            projectId,
+            owner:userId,
+            isDeleted:false
+        }).sort({
+            name:1,
+            type:-1
+        })
+
+        const tree = await buildTree(files)
+
+        return res.status(200).json(tree)
+
+    } catch (error) {
+        return res.status(500).json({message : `Get Tree Error ${error}`})
     }
 }
