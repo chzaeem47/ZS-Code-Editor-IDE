@@ -1,20 +1,21 @@
-import express from 'express'
-import { createFile, createFolder, createRootFolder, deleteFile, getFile, getTree, updateFile } from '../controllers/file.controller.js'
+import express from "express";
 
-const router = express.Router()
+import {createRootFolder,createFolder,createFile,updateFile,deleteFile,getFile,getTree} from "../controllers/file.controller.js";
 
-router.post('/create-root-folder' , createRootFolder)
+const router = express.Router();
 
-router.post('/create-folder' , createFolder)
+router.post("/create-root-folder",createRootFolder);
 
-router.post('/create-file' , createFile)
+router.post("/create-folder",createFolder);
 
-router.post('/update/:id' , updateFile )
+router.post("/create-file", createFile);
 
-router.delete('/:id' , deleteFile)
+router.patch( "/update/:id", updateFile );
 
-router.get('/:id' , getFile)
+router.get( "/tree/:projectId", getTree);
 
-router.get('/tree/:projectId' , getTree)
+router.get("/:id",getFile);
 
-export default router
+router.delete("/:id", deleteFile);
+
+export default router;
