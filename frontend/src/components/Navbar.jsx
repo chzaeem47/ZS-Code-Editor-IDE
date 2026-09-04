@@ -5,9 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { logout } from "../features/logout";
 import { logoutLocal } from "../redux/slices/authSlice";
+import { useWorkspace } from "../context/WorkspaceContext";
+import { FaCode, FaDesktop } from "react-icons/fa";
 
 const Navbar = () => {
     const { isDark, toggleTheme } = useTheme();
+    const { viewMode, setViewMode } = useWorkspace();
     const user = useSelector((state) => state.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -39,9 +42,24 @@ const Navbar = () => {
             <div className={`mx-auto flex h-[50px] max-w-[1520px] rounded-2xl translate-y-2 items-center justify-between border-b px-4 backdrop-blur-3xl effect-less transition-all duration-500 sm:px-5 ${isDark ? "border-slate-800/80 bg-slate-900/90" : "border-black/10 bg-white/70"}`}>
 
                 {/* LOGO */}
-                <button type="button" onClick={() => navigate("/")} className="flex items-center w-10">
-                    <div className={`bg-contain bg-center bg-no-repeat transition-all duration-500 sm:h-14 sm:w-14 ${isDark ? "bg-[url('/dark-logo.png')]" : "bg-[url('/light-logo.png')]"}`} />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => navigate("/")} className="flex items-center w-10">
+                        <div className={`bg-contain bg-center bg-no-repeat transition-all duration-500 sm:h-14 sm:w-14 ${isDark ? "bg-[url('/dark-logo.png')]" : "bg-[url('/light-logo.png')]"}`} />
+                    </button>
+
+                    {/* CODE / PREVIEW */}
+                    <div className="ml-1 flex items-center gap-1 rounded-full border border-white/10 bg-black/5 p-0.5 backdrop-blur-xl">
+                        <button type="button" onClick={() => setViewMode("code")} className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-all duration-300 ${viewMode === "code" ? (isDark ? "bg-purple-800 text-white" : "bg-black/10 text-[#1227b2]") : (isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-slate-500 hover:bg-black/5 hover:text-slate-800")}`}>
+                            <FaCode className="text-[11px]" />
+                            Code
+                        </button>
+
+                        <button type="button" onClick={() => setViewMode("preview")} className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-all duration-300 ${viewMode === "preview" ? (isDark ? "bg-purple-800 text-white" : "bg-black/10 text-[#1227b2]") : (isDark ? "text-white/50 hover:bg-white/5 hover:text-white" : "text-slate-500 hover:bg-black/5 hover:text-slate-800")}`}>
+                            <FaDesktop className="text-[11px]" />
+                            Preview
+                        </button>
+                    </div>
+                </div>
 
                 {/* RIGHT SIDE */}
                 <div className="flex items-center gap-2 sm:gap-3">

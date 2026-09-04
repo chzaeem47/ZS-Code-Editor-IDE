@@ -1,9 +1,6 @@
 import { api } from "../utils/axios.js";
 
 
-// ==========================================
-// CREATE PROJECT
-// ==========================================
 export const createProject = async (name, description) => {
     try {
         const { data } = await api.post(
@@ -26,9 +23,6 @@ export const createProject = async (name, description) => {
 };
 
 
-// ==========================================
-// GET PROJECTS
-// ==========================================
 export const getProjects = async () => {
     try {
         const { data } = await api.get(
@@ -47,9 +41,6 @@ export const getProjects = async () => {
 };
 
 
-// ==========================================
-// GET PROJECT BY ID
-// ==========================================
 export const getProjectById = async (id) => {
     try {
         const { data } = await api.get(
@@ -68,9 +59,7 @@ export const getProjectById = async (id) => {
 };
 
 
-// ==========================================
-// GET STARRED PROJECTS
-// ==========================================
+
 export const getStarredProject = async () => {
     try {
         const { data } = await api.get(
@@ -89,9 +78,6 @@ export const getStarredProject = async () => {
 };
 
 
-// ==========================================
-// TOGGLE STAR
-// ==========================================
 export const toggleStar = async (id) => {
     try {
         const { data } = await api.patch(
@@ -110,9 +96,6 @@ export const toggleStar = async (id) => {
 };
 
 
-// ==========================================
-// DELETE PROJECT
-// ==========================================
 export const deleteProject = async (id) => {
     try {
         const { data } = await api.delete(

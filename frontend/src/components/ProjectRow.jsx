@@ -11,9 +11,15 @@ const ProjectRow = ({
     selected,
     onSelect,
     onToggleStar,
+    onOpen,
 }) => {
     return (
         <div
+            onClick={() => {
+                if (!selectionMode) {
+                    onOpen(project);
+                }
+            }}
             className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 ${
                 selected
                     ? isDark
@@ -22,13 +28,20 @@ const ProjectRow = ({
                     : isDark
                         ? "border-white/5 bg-white/[0.025] hover:bg-white/[0.07]"
                         : "border-black/5 bg-black/[0.02] hover:bg-black/[0.05]"
+            } ${
+                !selectionMode
+                    ? "cursor-pointer"
+                    : ""
             }`}
         >
             {/* CHECKBOX */}
             {selectionMode && (
                 <button
                     type="button"
-                    onClick={() => onSelect(project._id)}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onSelect(project._id);
+                    }}
                     aria-label={`Select ${project.name}`}
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
                         selected
@@ -81,9 +94,10 @@ const ProjectRow = ({
             {/* STAR */}
             <button
                 type="button"
-                onClick={() =>
-                    onToggleStar(project._id)
-                }
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onToggleStar(project._id);
+                }}
                 aria-label={
                     project.starred
                         ? "Remove star"
