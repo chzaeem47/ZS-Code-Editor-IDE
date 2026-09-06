@@ -1,15 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Cherry+Cream+Soda&family=Cookie&family=Story+Script&family=Tangerine:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@100;200;300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
 @theme {
-  --font-tangerine: "Tangerine", cursive;
-  --font-story: "Story Script", cursive;
-  --font-cherry: "Cherry Cream Soda", system-ui;
-  --font-cookie: "Cookie", cursive;
+  --font-plex: "IBM Plex Serif", serif;
+  --font-tangerine: "Tangerine", cursive; 
+  --font-story: "Story Script", cursive; 
+  --font-cherry: "Cherry Cream Soda", system-ui; 
+  --font-cookie: "Cookie", cursive; 
   --font-lugrasimo: "Lugrasimo", cursive;
-}
 
+}
 
 @layer utilities {
   .effect-3d {
