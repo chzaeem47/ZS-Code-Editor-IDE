@@ -9,7 +9,6 @@
   --font-cherry: "Cherry Cream Soda", system-ui; 
   --font-cookie: "Cookie", cursive; 
   --font-lugrasimo: "Lugrasimo", cursive;
-
 }
 
 @layer utilities {
@@ -37,4 +36,42 @@
 }
 
 
+/* =========================================================
+   ZS CODE — EXPLORER SCROLLBAR
+   Dark • Thin • Minimal • VS Code Style
+   ========================================================= */
 
+/* Scrollbar width */
+.explorer-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Scrollbar track */
+.explorer-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Scrollbar thumb */
+.explorer-scroll::-webkit-scrollbar-thumb {
+  background: rgba(209, 213, 219, 0.10);
+  border-radius: 999px;
+  border: none;
+  box-shadow: none;
+  transition: background 0.2s ease;
+}
+
+/* Hover */
+.explorer-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(209, 213, 219, 0.18);
+}
+
+/* Corner */
+.explorer-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+.explorer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(209, 213, 219, 0.10) transparent;
+}

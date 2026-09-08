@@ -15,7 +15,7 @@ const WorkspaceArea = () => {
 
   return (
     <div
-      className={`fixed bottom-[12px] left-[435px] right-[10px] top-[120px] z-10 overflow-hidden rounded-xl border ${
+      className={`fixed bottom-0 left-71.5 right-0 top-24 z-10 overflow-hidden rounded-md border ${
         isDark
           ? "border-white/15 bg-[#0d1117]"
           : "border-black/10 bg-white"

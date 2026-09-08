@@ -2,6 +2,8 @@ import { FaTimes,FaFileCode,FaFileAlt,FaDatabase,FaServer } from "react-icons/fa
 import { SiJavascript,SiTypescript,SiReact,SiJson,SiCss,SiHtml5,SiMarkdown,SiGit } from "react-icons/si";
 import { useTheme } from "../context/ThemeContext";
 import { useWorkspace } from "../context/WorkspaceContext";
+import { IoIosRemoveCircle } from "react-icons/io";
+
 
 const getFileIcon = (file) => {
     const extension = (file?.extension || file?.name?.split(".").pop() || "").toLowerCase();
@@ -59,16 +61,16 @@ const FileTabsNavbar = () => {
                     const { icon:Icon,color } = getFileIcon(file);
 
                     return (
-                        <div key={fileId} className={`group relative flex h-[40px] min-w-[130px] max-w-[220px] shrink-0 items-center border-r transition-all duration-200 ${isDark ? "border-white/10" : "border-black/10"} ${isActive ? isDark ? "bg-white/[0.09]" : "bg-black/[0.05]" : isDark ? "bg-transparent hover:bg-white/[0.035]" : "bg-transparent hover:bg-black/[0.02]"}`}>
-                            {isActive && <span className={`absolute bottom-0 left-0 right-0 h-[2px] ${isDark ? "bg-cyan-400" : "bg-[#1227b2]"}`}/>}
+                        <div key={fileId} className={`font-plex ml-1 mr-1 group relative flex h-[42px] min-w-[130px] max-w-[220px] shrink-0 items-center border-t-2 border-r-2 border-l-2 transition-all duration-200 rounded-t-md ${isDark ? "border-gray-300/10" : "border-black/10"} ${isActive ? isDark ? "bg-[#181818]" : "bg-black/[0.05]" : isDark ? "bg-transparent hover:bg-white/[0.035]" : "bg-transparent hover:bg-black/[0.02]"}`}>
+                            {isActive && <span className={`absolute bottom-0 left-0 right-0 h-[2px] ${isDark ? "bg-purple-600" : "bg-[#1227b2]"}`}/>}
 
                             <button type="button" onClick={() => activateFile(fileId)} className={`flex min-w-0 flex-1 items-center gap-2 px-3 text-left text-[16px] transition-all duration-200 ${isActive ? isDark ? "text-white" : "text-slate-900" : isDark ? "text-white/45 hover:text-white/75" : "text-slate-500 hover:text-slate-800"}`} title={file.name}>
                                 <Icon className={`shrink-0 text-[13px] ${color}`}/>
                                 <span className="min-w-0 flex-1 truncate">{file.name}</span>
                             </button>
 
-                            <button type="button" onClick={() => closeFile(fileId)} aria-label={`Close ${file.name}`} className={`mr-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-all ${isDark ? "text-white/30 hover:bg-white/10 hover:text-white" : "text-slate-400 hover:bg-black/10 hover:text-slate-800"}`}>
-                                <FaTimes className="text-[8px]"/>
+                            <button type="button" onClick={() => closeFile(fileId)} aria-label={`Close ${file.name}`} className={` rounded-full mr-1 flex h-5 w-5 shrink-0 items-center justify-center transition-all ${isDark ? "hover:bg-white" : "text-slate-400 hover:bg-black/10 hover:text-slate-800"}`}>
+                                <IoIosRemoveCircle className="text-red-500"/>
                             </button>
                         </div>
                     );

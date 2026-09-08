@@ -53,7 +53,7 @@ const FileExplorer = ({ project }) => {
     return (
         <div className="flex h-full w-full flex-col overflow-hidden">
            
-            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            <div className={`explorer-scroll min-h-0 flex-1 overflow-y-auto p-2 ${isDark ? "explorer-scroll-dark" : "explorer-scroll-light"}`}>
                 {!project ? (
                     <div className="flex h-full flex-col items-center justify-center px-5 text-center">
                         <FaCode className={`mb-3 text-4xl ${isDark ? "text-white/20" : "text-slate-300"}`}/>
