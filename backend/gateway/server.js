@@ -38,9 +38,7 @@ app.use(morgan("dev"));
 app.use("/api/auth",proxy(
         process.env.AUTH_SERVICE,
         {
-            proxyReqPathResolver: (
-                req
-            ) => {
+            proxyReqPathResolver: (req) => {
                 return `/api/auth${req.url}`;
             },
         }
@@ -49,8 +47,8 @@ app.use("/api/auth",proxy(
 
 app.use("/api/me",proxy(
 
-        process.env.AUTH_SERVICE,
-        {
+        process.env.AUTH_SERVICE,{
+            
             proxyReqPathResolver: () => {
                 return "/me";
             },
