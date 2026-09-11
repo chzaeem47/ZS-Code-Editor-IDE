@@ -146,6 +146,7 @@ export const createFile = async (req, res) => {
             parentId,
             content = "",
             language = "plaintext",
+
         } = req.body;
 
         const userId = req.headers["x-user-id"];

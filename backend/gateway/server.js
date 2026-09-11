@@ -73,7 +73,7 @@ app.use("/api/file",protect,
 app.use("/api/ai",protect,
     proxyWithHeader(
         process.env.AI_SERVICE,
-        "file"
+        "ai"
     )
 );
 

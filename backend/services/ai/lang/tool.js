@@ -1,4 +1,6 @@
-import { getFile, getTree,createFolder, createFile, updateFile } from "../utils/fetchFile.js"
+import { getFile, getTree,createFolder, createFile, updateFile, deleteFile } from "../utils/fetchFile.js"
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
 
 const compactTree = (items=[])=>{
     return items.map((item)=>({
@@ -35,7 +37,7 @@ export const fileTools = ({projectId,userId})=>{
         1. Use this when the project structure is unknown
         2. Do not repeatedly call get_tree
         3. type="folder" means folder
-        4. type="files  means file
+        4. type="file"  means file
         5. Folder IDs are used as parentId
         6. NEVER Call get_file with a folder Id
         7. Donot Use Terminal Commands to inspect the project
@@ -257,7 +259,7 @@ const updateFileTool = tool(async({name,fileId,content,})=>{
 const deleteFileTool = tool(async({fileId})=>{
         console.log('ai tool-delete_file')
 
-        const file = await updateFile({userId,id:fileId})
+        const file = await deleteFile({userId,id:fileId})
     
         return JSON.stringify({
             success:true,
