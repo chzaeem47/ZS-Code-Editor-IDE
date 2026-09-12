@@ -34,19 +34,27 @@ const sendEvent = (res,type,data)=>{
     }
 }
 
+const getFriendlyAIError=error=>{
+    const message=String(error?.message||"");
+    if(/in_flight_budget|rate.?limit|engine_overloaded|temporarily|overloaded/i.test(message))return "ZS Code is temporarily busy. Your project was not damaged; please retry shortly.";
+    if(/timeout|ETIMEDOUT/i.test(message))return "The AI provider took too long to respond. Please try again.";
+    if(/401|403|api.?key|unauthorized/i.test(message))return "The AI provider authentication is unavailable.";
+    return "The AI agent could not complete this request.";
+};
+
 export const chat = async(req,res)=>{
     let disconnected = false
 
     try {
-        const {projectId,message,history=[]} = req.body
+        const {projectId,message,history=[],projectContext=null} = req.body
         const userId = req.headers['x-user-id']
 
         if(!projectId){
-            return res.status(401).json({message : "Project not Found"})
+            return res.status(400).json({message : "Project not found."})
         }
 
-        if(!message){
-            return res.status(401).json({message: "Message not Found"})
+        if(!message?.trim()){
+            return res.status(400).json({message: "Message is required."})
         }
 
         res.setHeader(
@@ -81,7 +89,7 @@ export const chat = async(req,res)=>{
             message:"AI Started"
         })
 
-        const graphData = graph({projectId,userId})
+        const graphData = graph({projectId,userId,projectContext})
         const messages = buildHistory(history)
 
         messages.push(new HumanMessage(message.trim()))
@@ -190,10 +198,11 @@ export const chat = async(req,res)=>{
         }
 
         if(res.headersSent){
-            sendEvent(res,"error",{
-                success:false,
-                message:error?.message || "AI Req Failed"
-            })
+            const raw=String(error?.message||"");
+            const retryable=/429|rate.?limit|engine_overloaded|temporarily|overloaded|in_flight_budget|timeout|ETIMEDOUT/i.test(raw);
+            sendEvent(res,"error",{success:false,retryable,message:getFriendlyAIError(error)});
+        }else{
+            return res.status(503).json({success:false,retryable:true,message:getFriendlyAIError(error)});
         }
 
         if(!res.writableEnded){

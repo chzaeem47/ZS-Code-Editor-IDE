@@ -18,17 +18,16 @@ const compactTree = (items=[])=>{
 /*
 * GET Tree Tool
 */
-export const fileTools = ({projectId,userId})=>{
+export const fileTools = ({projectId,userId,projectContext})=>{
     const getTreeTool = tool(async()=>{
         console.log('ai tool-get_tree')
 
+        if(projectContext){
+            return JSON.stringify({success:true,source:"ide_context",tree:projectContext,skipped:true})
+        }
         const result = await getTree({projectId,userId})
         const tree = compactTree(result)
-
-        return JSON.stringify({
-            success:true,
-            tree
-        })
+        return JSON.stringify({success:true,tree})
     },
     {
         name:"get_tree",
@@ -105,7 +104,7 @@ const getFileTool = tool(async({fileId})=>{
         2. NEVER pass a folderId
         3. Use exact fileId from get_tree
         4. Call this before update_file
-        5. Don't call this for newely created files unless unecessary
+        5. Do not reread newly created files unless validating or debugging
         6. Don't call this repeatedly for the same file
         
         The Response contains the complete file content`,
