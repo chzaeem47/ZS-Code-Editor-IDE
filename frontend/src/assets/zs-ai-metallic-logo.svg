@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="geminiMain" x1="95" y1="80" x2="425" y2="435" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4285F4"/>
+      <stop offset="25%" stop-color="#34A853"/>
+      <stop offset="50%" stop-color="#FBBC05"/>
+      <stop offset="72%" stop-color="#EA4335"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+
+    <linearGradient id="geminiLeft" x1="55" y1="220" x2="190" y2="345" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4285F4"/>
+      <stop offset="45%" stop-color="#34A853"/>
+      <stop offset="100%" stop-color="#00C4CC"/>
+    </linearGradient>
+
+    <linearGradient id="geminiRight" x1="325" y1="220" x2="465" y2="345" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBBC05"/>
+      <stop offset="45%" stop-color="#EA4335"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+
+  <path fill="url(#geminiMain)" d="M256 88c18 72 31 85 103 103-72 18-85 31-103 103-18-72-31-85-103-103 72-18 85-31 103-103Z"/>
+  <path fill="url(#geminiLeft)" d="M127 221c10 40 18 48 58 58-40 10-48 18-58 58-10-40-18-48-58-58 40-10 48-18 58-58Z" opacity=".98"/>
+  <path fill="url(#geminiRight)" d="M385 221c10 40 18 48 58 58-40 10-48 18-58 58-10-40-18-48-58-58 40-10 48-18 58-58Z" opacity=".98"/>
+</svg>
