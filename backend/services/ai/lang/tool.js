@@ -15,6 +15,18 @@ const compactTree = (items=[])=>{
     }))
 }
 
+const normalizeGeneratedContent=content=>{
+    let value=String(content??"");
+
+    const escapedQuotes=(value.match(/\\"/g)||[]).length;
+
+    if(escapedQuotes>=2){
+        value=value.replace(/\\"/g,'"');
+    }
+
+    return value;
+};
+
 /*
 * GET Tree Tool
 */
@@ -163,12 +175,22 @@ const createFolderTool = tool(async({name,parentId})=>{
 /*
 * Create File Tool
 */
-const createFileTool = tool(async({name,parentId,content,language})=>{
-        console.log('ai tool-create_file')
+const createFileTool=tool(
+    async({name,parentId,content,language})=>{
+        console.log("ai tool-create_file");
 
-        const file = await createFile({projectId,userId,name,parentId,content,
-            language:language || "plaintext"})
-    
+        const safeContent=
+            normalizeGeneratedContent(content);
+
+        const file=await createFile({
+            projectId,
+            userId,
+            name,
+            parentId,
+            content:safeContent,
+            language:language||"plaintext"
+        });
+
         return JSON.stringify({
             success:true,
             operation:"file_created",
@@ -179,28 +201,24 @@ const createFileTool = tool(async({name,parentId,content,language})=>{
                 parentId:file.parentId,
                 language:file.language,
                 content:file.content
-                
             }
-        })
+        });
     },
     {
         name:"create_file",
         description:`Create a NEW FILE.
-        RULES:
-        2. Use exact folder ID as parentId.
-        1. Use get_tree first when project structure is unknown.
-        3. Never create duplicate files.
-        4. Send complete file content.
-        5. Create folders before files inside them.
-        6. Never use terminal commands to create files.
-        7. Do not call get file immediately after creating a file.
-        8. Continue creating all required files.
-        9. Do not stop after creating only one file.
-        For a React/Vite project, create ALL required files.`,
-        /**
-         * Tells is they need any input parameter to call the tool
-         * if don't need leave the brackets empty
-         */
+
+RULES:
+1. Use exact folder ID as parentId.
+2. Use get_tree first when project structure is unknown.
+3. Never create duplicate files.
+4. Send complete file content.
+5. Create folders before files inside them.
+6. Never use terminal commands to create files.
+7. Do not call get_file immediately after creating a file.
+8. Continue creating all required files.
+9. For React/Vite create all required files.
+10. Never double-escape normal source-code quotes.`,
         schema:z.object({
             name:z.string(),
             parentId:z.string().nullable(),
@@ -208,16 +226,25 @@ const createFileTool = tool(async({name,parentId,content,language})=>{
             content:z.string()
         })
     }
-)
+);
 
 /* 
 * Update File
 */
-const updateFileTool = tool(async({name,fileId,content,})=>{
-        console.log('ai tool-update_file')
+const updateFileTool=tool(
+    async({name,fileId,content})=>{
+        console.log("ai tool-update_file");
 
-        const file = await updateFile({userId,name,content,id:fileId})
-    
+        const safeContent=
+            normalizeGeneratedContent(content);
+
+        const file=await updateFile({
+            userId,
+            name,
+            content:safeContent,
+            id:fileId
+        });
+
         return JSON.stringify({
             success:true,
             operation:"file_updated",
@@ -228,32 +255,29 @@ const updateFileTool = tool(async({name,fileId,content,})=>{
                 parentId:file.parentId,
                 language:file.language,
                 content:file.content
-                
             }
-        })
+        });
     },
     {
         name:"update_file",
         description:`Update an EXISTING FILE.
-        RULES:
-        1. Call get_file before updating.
-        2. fileId must be an actual file ID.
-        3. NEVER use a folder ID.
-        4. Send the complete updated file content.
-        5. Do not update files that do not exist.
-        6. After successful update continue with remaining work.
-        7. Do not call get_file again unless another modification is needed.`,
-        /**
-         * Tells is they need any input parameter to call the tool
-         * if don't need leave the brackets empty
-         */
+
+RULES:
+1. Call get_file before updating.
+2. fileId must be an actual file ID.
+3. NEVER use a folder ID.
+4. Send the complete updated file content.
+5. Do not update files that do not exist.
+6. After successful update continue with remaining work.
+7. Do not call get_file again unless another modification is needed.
+8. Never double-escape normal source-code quotes.`,
         schema:z.object({
             name:z.string(),
             content:z.string(),
             fileId:z.string()
         })
     }
-)
+);
 
 const deleteFileTool = tool(async({fileId})=>{
         console.log('ai tool-delete_file')
