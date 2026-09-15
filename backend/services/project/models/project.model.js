@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+/*
+* PROJECT SCHEMA & MODEL
+*/
 const projectSchema = new mongoose.Schema({
 
     owner:{

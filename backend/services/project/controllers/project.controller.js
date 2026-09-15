@@ -1,7 +1,9 @@
 import { projectModel } from "../models/project.model.js";
 import { redis } from "../../../shared/redis/redis.js";
 
-
+/*
+* CREATE PROJECT CONTROLLER
+*/
 export const createProject = async (req, res) => {
     try {
         const userID = req.headers["x-user-id"];
@@ -83,6 +85,10 @@ export const getProjects = async (req, res) => {
                 updatedAt: -1,
             });
 
+        /*
+        * SET DATA IN REDIS FOR GETTING PROJECTS
+        * CACHING CONCEPT BY REDIS
+        */
         await redis.set(
             key,
             JSON.stringify(projects),
@@ -123,6 +129,9 @@ export const getProjectById = async (req, res) => {
             });
         }
 
+        /*
+        * PROJECT LAST OPENED UPDATED
+        */
         project.lastOpenedAt = new Date();
 
         await project.save();
@@ -169,6 +178,9 @@ export const getStarredProjects = async (req, res) => {
                 updatedAt: -1,
             });
 
+        /*
+        * GET STARRED PROJECTS BY REDIS CACHING
+        */
         await redis.set(
             key,
             JSON.stringify(projects),
@@ -214,6 +226,9 @@ export const toggleStar = async (req, res) => {
 
         await project.save();
 
+        /*
+        * SET A PROMISE FOR TOGGLE PROJECT TO STARRED PROJECT
+        */
         await Promise.all([
             redis.del(`projects-${userID}`),
             redis.del(`starred-projects-${userID}`),

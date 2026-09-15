@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-
+/*
+* DB CONNECTION FOR PROJECT SERVER
+*/
 export const connectDB = async () => {
 
     try {
