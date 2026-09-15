@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-
+/*
+* File service db Connection
+*/
 export const connectDB = async () => {
 
     try {

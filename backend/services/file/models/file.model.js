@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+/*
+* File Schema & Model
+*/
 const fileSchema = new mongoose.Schema({
 
     owner:{

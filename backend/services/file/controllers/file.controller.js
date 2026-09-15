@@ -6,6 +6,9 @@ const isValidObjectId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
 };
 
+/*
+* Create root folder
+*/
 export const createRootFolder = async (req, res) => {
     try {
         const { projectId, projectName } = req.body;
@@ -61,7 +64,9 @@ export const createRootFolder = async (req, res) => {
     }
 };
 
-
+/*
+* Create Folder
+*/
 export const createFolder = async (req, res) => {
     try {
         const { projectId, name, parentId } = req.body;
@@ -137,7 +142,9 @@ export const createFolder = async (req, res) => {
     }
 };
 
-
+/*
+* Create File
+*/
 export const createFile = async (req, res) => {
     try {
         const {
@@ -229,7 +236,9 @@ export const createFile = async (req, res) => {
     }
 };
 
-
+/*
+* Create Update File
+*/
 export const updateFile = async (req, res) => {
     try {
         const userId = req.headers["x-user-id"];
@@ -332,7 +341,9 @@ export const updateFile = async (req, res) => {
     }
 };
 
-
+/*
+* Create Delete File
+*/
 export const deleteFile = async (req, res) => {
     try {
         const userId = req.headers["x-user-id"];
@@ -404,7 +415,9 @@ export const deleteFile = async (req, res) => {
     }
 };
 
-
+/*
+* Create Get File
+*/
 export const getFile = async (req, res) => {
     try {
         const userId = req.headers["x-user-id"];
@@ -443,7 +456,9 @@ export const getFile = async (req, res) => {
     }
 };
 
-
+/*
+* Create Get Tree
+*/
 export const getTree = async (req, res) => {
     try {
         const userId = req.headers["x-user-id"];
@@ -490,7 +505,9 @@ export const getTree = async (req, res) => {
     }
 };
 
-
+/*
+* Build Tree
+*/
 const buildTree = (files) => {
     const map = {};
     const tree = [];
@@ -543,7 +560,9 @@ const buildTree = (files) => {
     return tree;
 };
 
-
+/*
+* Get Descendants ID's
+*/
 const getDescendantIds = async (parentId) => {
     const descendants = [];
     const queue = [parentId];
