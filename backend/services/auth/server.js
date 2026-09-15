@@ -59,7 +59,7 @@ app.use((error, req, res, next) => {
 app.listen(port, async()=>{
     try {
 
-        console.log(`Server is Running on Port ${port}`)
+        console.log(`Auth Server is Running on Port ${port}`)
         await connectDB()
 
     } catch (error) {
