@@ -9,6 +9,9 @@ import {protect} from "../services/auth/middlewares/protect.js";
 
 import {proxyWithHeader} from "../shared/proxyWIthHeader.js";
 
+/*
+*Dot Env Configuration
+*/
 dotenv.config();
 
 const app = express();
@@ -16,8 +19,10 @@ const app = express();
 const port =
     process.env.PORT || 3000;
 
-app.use(
-    cors({
+/*
+* Cors So that our frontend or backend communicate without Cross origin errors
+*/
+app.use(cors({
         origin:
             process.env.FRONTEND_URL,
         credentials: true,
@@ -25,13 +30,22 @@ app.use(
 );
 
 app.use(express.json({ limit: "10mb" }));
+
+/*
+* Built in Middleware Looks for req's where content-type header = application/x-www-form-
+*/
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(cookieParser());
 
+/*
+* Use to log Incoming HTTP req directly into your console
+*/
 app.use(morgan("dev"));
 
-
+/*
+* AUTH Service SERVER
+*/
 app.use("/api/auth",proxy(
         process.env.AUTH_SERVICE,
         {
@@ -42,6 +56,9 @@ app.use("/api/auth",proxy(
     )
 );
 
+/*
+* Get Current User
+*/
 app.use("/api/me",proxy(
 
         process.env.AUTH_SERVICE,{
@@ -53,6 +70,9 @@ app.use("/api/me",proxy(
     )
 );
 
+/*
+* Project Service SERVER
+*/
 app.use("/api/project",protect,
     proxyWithHeader(
         process.env.PROJECT_SERVICE,
@@ -60,6 +80,9 @@ app.use("/api/project",protect,
     )
 );
 
+/*
+* File Service SERVER
+*/
 app.use("/api/file",protect,
     proxyWithHeader(
         process.env.FILE_SERVICE,
@@ -67,6 +90,9 @@ app.use("/api/file",protect,
     )
 );
 
+/*
+* AI Service SERVER
+*/
 app.use("/api/ai",protect,
     proxyWithHeader(
         process.env.AI_SERVICE,
