@@ -1,5 +1,9 @@
 import { redis } from "../../../shared/redis/redis.js"
 
+/*
+* Protect Middleware for Login API 
+* Never accepts a unauthorized Access
+*/
 export const protect = async(req,res,next)=>{
 
     try {

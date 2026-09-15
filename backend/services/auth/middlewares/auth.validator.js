@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 
+/*
+* SIGNUP SCHEMA Using ZOD
+* ZOD is TypeScript-first schema & runtime data validation library for JS and TS
+*/
 export const signupSchema = z.object({
 
     name: z

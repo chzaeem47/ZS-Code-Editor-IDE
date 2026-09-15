@@ -1,6 +1,9 @@
 import { RateLimiterRedis } from "rate-limiter-flexible";
 import { redis } from '../../../shared/redis/redis.js'
 
+/* 
+* Rate Limiting API Using Redis
+*/
 const loginIpLimiter = new RateLimiterRedis({
     storeClient: redis,
     keyPrefix: "rl:login:ip",

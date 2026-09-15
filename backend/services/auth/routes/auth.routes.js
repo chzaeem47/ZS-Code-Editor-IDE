@@ -8,11 +8,15 @@ const router = Router();
 
 /**
 * - /api/auth/signup 
+* Rate Limiter Middleware
+* Validate Schema Middleware
 */
 router.post("/signup", validate(signupSchema), signupRateLimiter, signup);
 
 /**
 * - /api/auth/login
+* Rate Limiter Middleware
+* Validate Schema Middleware
 */
 router.post("/login", loginRateLimiter, validate(loginSchema), login);
 

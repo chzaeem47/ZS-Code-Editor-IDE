@@ -3,6 +3,9 @@ import "dotenv/config";
 import { Queue } from "bullmq";
 import { redis } from "../../../shared/redis/redis.js";
 
+/*
+* Email Queue Where tasks are stored then workers perform them side by side
+*/
 export const emailQueue = new Queue("emailQueue", {
 
     connection:redis,

@@ -12,6 +12,9 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+/*
+* Email Template SendWelcome Email using Nodemailer
+*/
 export const sendWelcomeEmail = async ({ email, username }) => {
 
     console.log("=================================");

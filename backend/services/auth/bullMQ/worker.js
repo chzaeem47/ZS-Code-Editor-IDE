@@ -5,6 +5,10 @@ import { redis } from "../../../shared/redis/redis.js";
 
 import { sendWelcomeEmail } from "../utils/email.service.js";
 
+/*
+* Worker That do the work for sending welcome email
+* Didn't disturb Signup just send welcome email side by side or after successful signup
+*/
 const worker = new Worker(
     "emailQueue",
 

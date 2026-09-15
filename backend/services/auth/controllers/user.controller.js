@@ -1,3 +1,8 @@
+
+/*
+* Get Curr User API
+*/
+
 export const getCurrUser = async(req,res)=>{
     try {
         return res.status(200).json(req.user)

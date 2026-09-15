@@ -6,6 +6,9 @@ import { redis } from "../../../shared/redis/redis.js";
 import { app } from "../config/firebase.js";
 import { createSession, setSessionCookie } from "../utils/session.js";
 
+/*
+* Signup API
+*/
 export const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -18,6 +21,9 @@ export const signup = async (req, res) => {
             });
         }
 
+        /*
+        * User Acc Password HASH by argon2 a Global standard hashing algo for password hashing
+        */
         const passwordHash = await argon2.hash(password, {
             type: argon2.argon2id,
         });
@@ -57,6 +63,9 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        /* 
+        * +passwordHash Ensures that a Standard DB query don't return the USer password
+        */
         const user = await userModel.findOne({ email }).select("+passwordHash");
 
         if (!user || !user.passwordHash) {
@@ -80,6 +89,9 @@ export const login = async (req, res) => {
             });
         }
 
+        /*
+        * Create User Login session and stored it in Cookies
+        */
         const sessionID = await createSession(user);
         setSessionCookie(res, sessionID);
 

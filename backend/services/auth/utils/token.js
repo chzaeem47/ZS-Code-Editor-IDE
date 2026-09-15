@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 
-
+/*
+* Standard JWT naming claims makes your application ready for scalability
+*/
 export const generateAccessToken = (user) => {
 
     return jwt.sign(

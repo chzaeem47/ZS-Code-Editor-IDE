@@ -1,6 +1,9 @@
 import crypto from "node:crypto";
 import { redis } from "../../../shared/redis/redis.js";
 
+/*
+* Saving data in Redis for caching
+*/
 export const createSession = async (user) => {
   const sessionID = crypto.randomUUID();
 
