@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-    FaFolderPlus,
     FaTimes,
+    FaCircleNotch
 } from "react-icons/fa";
+
+
 
 const CreateProjectModal = ({
     isOpen,
@@ -87,28 +89,19 @@ const CreateProjectModal = ({
                             stiffness: 260,
                             damping: 24,
                         }}
-                        className={`w-full max-w-[460px] rounded-[28px] border p-5 effect-less ${
+                        className={`w-full max-w-[460px] rounded-xl border p-5 effect-less ${
                             isDark
-                                ? "border-white/10 bg-gradient-to-br from-[#0c1438]/98 via-[#101944]/98 to-[#190d2d]/98"
+                                ? "border-white/10 bg-[#181818]"
                                 : "border-black/10 bg-white/95"
                         }`}
+
                     >
                         {/* HEADER */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div
-                                    className={`flex h-11 w-11 items-center justify-center rounded-full ${
-                                        isDark
-                                            ? "bg-cyan-400/10 text-cyan-300"
-                                            : "bg-[#1227b2] text-white"
-                                    }`}
-                                >
-                                    <FaFolderPlus size={20}/>
-                                </div>
-
                                 <div>
                                     <h2
-                                        className={`font-serif text-xl font-bold ${
+                                        className={`font-plex text-xl px-1.5 ${
                                             isDark
                                                 ? "text-white"
                                                 : "text-slate-900"
@@ -124,13 +117,13 @@ const CreateProjectModal = ({
                                 type="button"
                                 onClick={onClose}
                                 disabled={creating}
-                                className={`flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${
+                                className={`flex h-5 w-5 items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${
                                     isDark
-                                        ? "text-white/50 hover:bg-white/10 hover:text-white"
+                                        ? "text-white/50 hover:text-red-500 hover:scale-150"
                                         : "text-slate-400 hover:bg-black/5 hover:text-slate-700"
                                 }`}
                             >
-                                <FaTimes />
+                                <FaCircleNotch />
                             </button>
                         </div>
 
@@ -142,9 +135,9 @@ const CreateProjectModal = ({
                             {/* NAME */}
                             <div>
                                 <label
-                                    className={`mb-2 block font-serif text-sm font-semibold ${
+                                    className={`mb-2 block font-plex px-2 text-sm ${
                                         isDark
-                                            ? "text-white/80"
+                                            ? "text-white"
                                             : "text-slate-700"
                                     }`}
                                 >
@@ -163,7 +156,7 @@ const CreateProjectModal = ({
                                     required
                                     className={`h-12 w-full rounded-xl border bg-transparent px-4 font-serif text-sm outline-none transition-all duration-300 ${
                                         isDark
-                                            ? "border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-white/5"
+                                            ? "border-white/10 text-white placeholder:text-white/30 focus:border-white/60 focus:bg-white/5"
                                             : "border-black/10 text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:bg-black/[0.02]"
                                     }`}
                                 />
@@ -172,9 +165,9 @@ const CreateProjectModal = ({
                             {/* DESCRIPTION */}
                             <div>
                                 <label
-                                    className={`mb-2 block font-serif text-sm font-semibold ${
+                                    className={`mb-2 block font-plex text-sm px-2 ${
                                         isDark
-                                            ? "text-white/80"
+                                            ? "text-white"
                                             : "text-slate-700"
                                     }`}
                                 >
@@ -193,7 +186,7 @@ const CreateProjectModal = ({
                                     rows={4}
                                     className={`w-full resize-none rounded-xl border bg-transparent px-4 py-3 font-serif text-sm outline-none transition-all duration-300 ${
                                         isDark
-                                            ? "border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-white/5"
+                                            ? "border-white/10 text-white placeholder:text-white/30 focus:border-white/60 focus:bg-white/5"
                                             : "border-black/10 text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:bg-black/[0.02]"
                                     }`}
                                 />

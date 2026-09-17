@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaDesktop, FaSyncAlt } from "react-icons/fa";
+import {
+    FaDesktop,
+    FaSyncAlt,
+    FaMinus,
+    FaExpand,
+} from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { getFile, getFileTree } from "../features/file";
@@ -43,7 +48,9 @@ const external = (value) =>
 
 const resolvePath = (from, ref) => {
     const value = cleanRef(ref);
+
     if (!value) return "";
+
     return normalize(
         value.startsWith("/")
             ? value.slice(1)
@@ -87,6 +94,7 @@ const findFile = (files, path) => {
 
 const contentOf = (file) => {
     if (!file) return "";
+
     return typeof file.content === "string"
         ? file.content
         : String(file.content ?? "");
@@ -97,6 +105,7 @@ const fileResponse = (response) => {
     if (response.file) return response.file;
     if (response.data?.file) return response.data.file;
     if (response.data) return response.data;
+
     return response;
 };
 
@@ -120,6 +129,7 @@ const Preview = () => {
     useEffect(() => {
         const openProject = (event) => {
             const value = event.detail || null;
+
             setProject(value);
             setReloadKey((v) => v + 1);
         };
@@ -477,16 +487,45 @@ ${escapeScript(contentOf(mainJs))}
          * Preview base styling.
          */
         if (!/data-zs-preview/i.test(html)) {
-            const style = `
-<style data-zs-preview>
-html,
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
-}
-</style>`;
-
+    const style = `
+        <style data-zs-preview>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            background: #181818;
+        }
+                
+        /* ZS Code Preview Scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4a4a4a transparent;
+        }
+                
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+                
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+                
+        *::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 999px;
+        }
+                
+        *::-webkit-scrollbar-thumb:hover {
+            background: #5a5a5a;
+        }
+                
+        *::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+        </style>`;
+                
             if (/<\/head>/i.test(html)) {
                 html = html.replace(
                     /<\/head>/i,
@@ -505,6 +544,23 @@ body {
         return html;
     }, [files, htmlFile]);
 
+    /* Open generated preview in a new browser tab */
+    const openPreviewInNewTab = useCallback(() => {
+        if (!srcDoc) return;
+
+        const blob = new Blob([srcDoc], {
+            type: "text/html",
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        window.open(url, "_blank", "noopener,noreferrer");
+
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 60000);
+    }, [srcDoc]);
+
     if (!project) {
         return (
             <div
@@ -516,6 +572,7 @@ body {
             >
                 <div className="text-center">
                     <FaDesktop className="mx-auto mb-4 text-5xl opacity-40" />
+
                     <p className="font-plex text-[15px]">
                         Open a project to preview it
                     </p>
@@ -535,6 +592,7 @@ body {
             >
                 <div className="text-center">
                     <FaSyncAlt className="mx-auto mb-3 animate-spin text-xl opacity-60" />
+
                     <p className="font-plex text-sm">
                         Loading project preview...
                     </p>
@@ -570,9 +628,11 @@ body {
             >
                 <div className="text-center">
                     <FaDesktop className="mx-auto mb-4 text-4xl opacity-40" />
+
                     <p className="font-plex text-sm">
                         No HTML entry file found.
                     </p>
+
                     <p className="mt-1 text-xs opacity-60">
                         Create index.html to start the preview.
                     </p>
@@ -582,7 +642,32 @@ body {
     }
 
     return (
-        <div className="h-full w-full overflow-hidden bg-white">
+        <div className="relative h-full w-full overflow-hidden bg-white ai-chat-scroll">
+            {/* Preview Controls */}
+            <div
+                className={`absolute right-5 top-1 z-10 flex items-center rounded-lg p-1 backdrop-blur-md ${
+                    isDark
+                        ? "bg-[#161b22]/90"
+                        : "bg-white/90 shadow-md"
+                }`}
+            >
+
+                {/* Open Preview in New Tab */}
+                <button
+                    type="button"
+                    onClick={openPreviewInNewTab}
+                    title="Open preview in new tab"
+                    className={`flex h-8 w-8 items-center justify-center rounded-md transition ${
+                        isDark
+                            ? "text-white/70 hover:bg-white/10 hover:text-white"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                >
+                    <FaExpand size={15  } />
+                </button>
+            </div>
+
+            {/* Generated Website */}
             <iframe
                 key={`${htmlFile._id || htmlFile.id}-${reloadKey}-${srcDoc.length}`}
                 title="ZS CODE Preview"
