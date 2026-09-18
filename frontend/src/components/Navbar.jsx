@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     FaChevronDown, FaSun, FaMoon, FaSignOutAlt, FaFolder, FaHome,
-    FaCode, FaDesktop, FaStar, FaTrash, FaCheck, FaMagic, FaTerminal
+    FaCode, FaDesktop, FaStar, FaTrash, FaCheck, FaMagic, FaTerminal,
+    FaFileAlt
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
@@ -18,6 +19,9 @@ import CreateProjectModal from "./CreateProjectModal";
 import { VscLightbulbSparkle } from "react-icons/vsc";
 import AIChatPanel from "./AIChatPanel";
 import Terminal from "./Terminal";
+import DocumentPopup from "./DocumentPopup";
+import { GrDocumentUser } from "react-icons/gr";
+
 
 const Navbar = () => {
     const { isDark, toggleTheme } = useTheme();
@@ -39,6 +43,7 @@ const Navbar = () => {
     const [aiOpen, setAiOpen] = useState(false);
     const [terminalOpen, setTerminalOpen] = useState(false);
     const [activeProject, setActiveProject] = useState(null);
+    const [isDocumentOpen, setIsDocumentOpen] = useState(false);
 
     const menuRef = useRef(null);
     const homeMenuRef = useRef(null);
@@ -467,10 +472,10 @@ const Navbar = () => {
                         )
                     }
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${selectedProjects.includes(project._id)
-                            ? "border-[#1227b2] bg-[#1227b2] text-white"
-                            : isDark
-                                ? "border-white/20 bg-white/5"
-                                : "border-slate-300 bg-white"
+                        ? "border-[#1227b2] bg-[#1227b2] text-white"
+                        : isDark
+                            ? "border-white/20 bg-white/5"
+                            : "border-slate-300 bg-white"
                         }`}
                 >
                     {selectedProjects.includes(project._id) && (
@@ -481,16 +486,16 @@ const Navbar = () => {
 
             <FaFolder
                 className={`shrink-0 text-[17px] ${isDark
-                        ? "text-cyan-400"
-                        : "text-[#1227b2]"
+                    ? "text-cyan-400"
+                    : "text-[#1227b2]"
                     }`}
             />
 
             <div className="min-w-0 flex-1">
                 <p
                     className={`truncate font-serif text-[14px] font-semibold ${isDark
-                            ? "text-white"
-                            : "text-slate-800"
+                        ? "text-white"
+                        : "text-slate-800"
                         }`}
                 >
                     {project.name}
@@ -499,8 +504,8 @@ const Navbar = () => {
                 {project.description && (
                     <p
                         className={`truncate text-[10px] ${isDark
-                                ? "text-white/35"
-                                : "text-slate-500"
+                            ? "text-white/35"
+                            : "text-slate-500"
                             }`}
                     >
                         {project.description}
@@ -514,10 +519,10 @@ const Navbar = () => {
                     handleToggleStar(event, project)
                 }
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${project.starred
-                        ? "text-yellow-400"
-                        : isDark
-                            ? "text-white/20 hover:text-yellow-400"
-                            : "text-slate-300 hover:text-yellow-500"
+                    ? "text-yellow-400"
+                    : isDark
+                        ? "text-white/20 hover:text-yellow-400"
+                        : "text-slate-300 hover:text-yellow-500"
                     }`}
             >
                 <FaStar className="text-[14px]" />
@@ -530,8 +535,8 @@ const Navbar = () => {
             <nav className="fixed left-0 right-0 top-0 z-50">
                 <div
                     className={`mx-auto flex h-[50px] max-w-[1550px] items-center justify-between border-b px-4 transition-all duration-500 sm:px-5 ${isDark
-                            ? "border-white/10 bg-[#414040]"
-                            : "border-black/10 bg-white/70"
+                        ? "border-white/10 bg-[#414040]"
+                        : "border-black/10 bg-white/70"
                         }`}
                 >
                     <div className="flex items-center gap-2">
@@ -551,20 +556,20 @@ const Navbar = () => {
                                 type="button"
                                 onClick={handleHomeClick}
                                 className={`flex h-8 items-center gap-2 rounded-md border px-3 transition-all ${homeOpen
-                                        ? isDark
-                                            ? "border-white/15 bg-white/[0.09] text-white"
-                                            : "border-black/10 bg-black/[0.05] text-slate-800"
-                                        : isDark
-                                            ? "border-gray-300/10 bg-white/[0.04] text-white hover:bg-white/[0.07]"
-                                            : "border-black/10 bg-white/[0.04] text-slate-700 hover:bg-black/[0.05]"
+                                    ? isDark
+                                        ? "border-white/15 bg-white/[0.09] text-white"
+                                        : "border-black/10 bg-black/[0.05] text-slate-800"
+                                    : isDark
+                                        ? "border-gray-300/10 bg-white/[0.04] text-white hover:bg-white/[0.07]"
+                                        : "border-black/10 bg-white/[0.04] text-slate-700 hover:bg-black/[0.05]"
                                     }`}
                             >
                                 <FaHome className="text-[17px]" />
 
                                 <FaChevronDown
                                     className={`text-[10px] transition-transform ${homeOpen
-                                            ? "rotate-180"
-                                            : ""
+                                        ? "rotate-180"
+                                        : ""
                                         }`}
                                 />
                             </button>
@@ -572,8 +577,8 @@ const Navbar = () => {
                             {homeOpen && (
                                 <div
                                     className={`absolute left-0 top-[calc(100%+12px)] w-[310px] overflow-hidden rounded-[20px] p-2 effect-3d backdrop-blur-3xl ${isDark
-                                            ? "bg-[#393636]"
-                                            : "border-black/10 bg-gradient-to-b from-white/98 to-slate-100/98"
+                                        ? "bg-[#393636]"
+                                        : "border-black/10 bg-gradient-to-b from-white/98 to-slate-100/98"
                                         }`}
                                 >
                                     <div className="my-2 h-px" />
@@ -581,8 +586,8 @@ const Navbar = () => {
                                     {!user ? (
                                         <div
                                             className={`px-3 py-8 text-center font-plex text-[15px] ${isDark
-                                                    ? "text-white/40"
-                                                    : "text-slate-400"
+                                                ? "text-white/40"
+                                                : "text-slate-400"
                                                 }`}
                                         >
                                             Sign in to view your projects
@@ -608,8 +613,8 @@ const Navbar = () => {
                                                         )
                                                     }
                                                     className={`effect-3d font-plex flex h-9 items-center justify-center rounded-full px-4 text-xl tracking-widest text-white ${selectionMode
-                                                            ? "bg-rose-600"
-                                                            : "bg-gradient-to-r from-[#0b165d] via-[#1227b2] to-[#0641e2]"
+                                                        ? "bg-rose-600"
+                                                        : "bg-gradient-to-r from-[#0b165d] via-[#1227b2] to-[#0641e2]"
                                                         }`}
                                                 >
                                                     {selectionMode
@@ -622,8 +627,8 @@ const Navbar = () => {
                                                 {projectsLoading ? (
                                                     <div
                                                         className={`px-3 py-8 text-center text-xs ${isDark
-                                                                ? "text-white/40"
-                                                                : "text-slate-400"
+                                                            ? "text-white/40"
+                                                            : "text-slate-400"
                                                             }`}
                                                     >
                                                         Loading projects...
@@ -634,14 +639,14 @@ const Navbar = () => {
                                                             <div
                                                                 key={project._id}
                                                                 className={`mt-2 flex items-center gap-0 rounded-4xl px-2.5 py-0.5 ${isDark
-                                                                        ? "bg-black/[0.5]"
-                                                                        : "bg-black/[0.03]"
+                                                                    ? "bg-black/[0.5]"
+                                                                    : "bg-black/[0.03]"
                                                                     }`}
                                                             >
                                                                 <span
                                                                     className={`w-5 text-center text-[14px] font-semibold font-plex ${isDark
-                                                                            ? "text-white"
-                                                                            : "text-slate-400"
+                                                                        ? "text-white"
+                                                                        : "text-slate-400"
                                                                         }`}
                                                                 >
                                                                     {index + 1} .
@@ -659,8 +664,8 @@ const Navbar = () => {
                                                 ) : (
                                                     <div
                                                         className={`px-3 py-8 text-center text-xs ${isDark
-                                                                ? "text-white/40"
-                                                                : "text-slate-400"
+                                                            ? "text-white/40"
+                                                            : "text-slate-400"
                                                             }`}
                                                     >
                                                         No projects yet
@@ -697,12 +702,12 @@ const Navbar = () => {
                                 onClick={handleStarClick}
                                 aria-label="Starred Projects"
                                 className={`ml-1 flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200 ${starOpen
-                                        ? isDark
-                                            ? "border-white/15 bg-white/[0.09] text-yellow-400"
-                                            : "border-black/10 bg-black/[0.05] text-yellow-500"
-                                        : isDark
-                                            ? "border-gray-300/10 bg-white/[0.04] text-white/60 hover:text-yellow-400"
-                                            : "border-black/10 bg-white/[0.04] text-slate-500 hover:text-yellow-500"
+                                    ? isDark
+                                        ? "border-white/15 bg-white/[0.09] text-yellow-400"
+                                        : "border-black/10 bg-black/[0.05] text-yellow-500"
+                                    : isDark
+                                        ? "border-gray-300/10 bg-white/[0.04] text-white/60 hover:text-yellow-400"
+                                        : "border-black/10 bg-white/[0.04] text-slate-500 hover:text-yellow-500"
                                     }`}
                             >
                                 <FaStar className="text-[15px]" />
@@ -711,8 +716,8 @@ const Navbar = () => {
                             {starOpen && (
                                 <div
                                     className={`absolute left-0 top-[calc(100%+12px)] w-[290px] overflow-hidden rounded-[20px] border p-2 effect-3d backdrop-blur-3xl ${isDark
-                                            ? "border-white/10 bg-[#393636]"
-                                            : "border-black/10 bg-gradient-to-b from-white/98 to-slate-100/98"
+                                        ? "border-white/10 bg-[#393636]"
+                                        : "border-black/10 bg-gradient-to-b from-white/98 to-slate-100/98"
                                         }`}
                                 >
                                     <div className="flex items-center gap-2 px-2 py-1">
@@ -720,8 +725,8 @@ const Navbar = () => {
 
                                         <span
                                             className={`font-plex tracking-wider font-semibold ${isDark
-                                                    ? "text-white"
-                                                    : "text-slate-800"
+                                                ? "text-white"
+                                                : "text-slate-800"
                                                 }`}
                                         >
                                             Starred Projects
@@ -730,16 +735,16 @@ const Navbar = () => {
 
                                     <div
                                         className={`my-2 h-px ${isDark
-                                                ? "bg-white/10"
-                                                : "bg-black/10"
+                                            ? "bg-white/10"
+                                            : "bg-black/10"
                                             }`}
                                     />
 
                                     {!user ? (
                                         <div
                                             className={`px-3 py-8 text-center font-plex text-[15px] ${isDark
-                                                    ? "text-white/40"
-                                                    : "text-slate-400"
+                                                ? "text-white/40"
+                                                : "text-slate-400"
                                                 }`}
                                         >
                                             Sign in to view your projects
@@ -749,8 +754,8 @@ const Navbar = () => {
                                             {starredLoading ? (
                                                 <div
                                                     className={`px-3 py-8 text-center text-xs ${isDark
-                                                            ? "text-white/40"
-                                                            : "text-slate-400"
+                                                        ? "text-white/40"
+                                                        : "text-slate-400"
                                                         }`}
                                                 >
                                                     Loading starred projects...
@@ -767,8 +772,8 @@ const Navbar = () => {
                                             ) : (
                                                 <div
                                                     className={`px-3 py-8 text-center text-[16px] font-plex ${isDark
-                                                            ? "text-white/40"
-                                                            : "text-slate-400"
+                                                        ? "text-white/40"
+                                                        : "text-slate-400"
                                                         }`}
                                                 >
                                                     No starred projects yet
@@ -785,12 +790,12 @@ const Navbar = () => {
                                 type="button"
                                 onClick={() => setViewMode("code")}
                                 className={`flex h-8 items-center gap-1.5 rounded-sm border border-purple-300/20 px-3 font-plex text-[17px] transition-all duration-300 ${viewMode === "code"
-                                        ? isDark
-                                            ? "bg-purple-800 text-white"
-                                            : "bg-black/10 text-[#1227b2]"
-                                        : isDark
-                                            ? "text-white/50 hover:bg-white/5 hover:text-white"
-                                            : "text-slate-500 hover:bg-black/5 hover:text-slate-800"
+                                    ? isDark
+                                        ? "bg-purple-800 text-white"
+                                        : "bg-black/10 text-[#1227b2]"
+                                    : isDark
+                                        ? "text-white/50 hover:bg-white/5 hover:text-white"
+                                        : "text-slate-500 hover:bg-black/5 hover:text-slate-800"
                                     }`}
                             >
                                 <FaCode className="text-[17px]" />
@@ -801,12 +806,12 @@ const Navbar = () => {
                                 type="button"
                                 onClick={() => setViewMode("preview")}
                                 className={`flex h-8 items-center gap-1.5 rounded-sm border border-blue-200/20 px-2 font-plex text-[17px] transition-all duration-300 ${viewMode === "preview"
-                                        ? isDark
-                                            ? "bg-blue-800 text-white"
-                                            : "bg-black/10 text-[#1227b2]"
-                                        : isDark
-                                            ? "text-white/50 hover:bg-white/5 hover:text-white"
-                                            : "text-slate-500 hover:bg-black/5 hover:text-slate-800"
+                                    ? isDark
+                                        ? "bg-blue-800 text-white"
+                                        : "bg-black/10 text-[#1227b2]"
+                                    : isDark
+                                        ? "text-white/50 hover:bg-white/5 hover:text-white"
+                                        : "text-slate-500 hover:bg-black/5 hover:text-slate-800"
                                     }`}
                             >
                                 <FaDesktop className="text-[17px]" />
@@ -828,12 +833,12 @@ const Navbar = () => {
                                         : "Open Terminal"
                                 }
                                 className={`group relative flex h-8 items-center gap-1.5 rounded-md border px-2.5 font-plex text-[15px] transition-all duration-300 ${terminalOpen
-                                        ? isDark
-                                            ? "border-purple-400/40 bg-purple-800/30 text-purple-300"
-                                            : "border-purple-300 bg-purple-100 text-purple-700"
-                                        : isDark
-                                            ? "border-white/10 bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white"
-                                            : "border-black/10 bg-white/40 text-slate-500 hover:bg-black/[0.05] hover:text-slate-800"
+                                    ? isDark
+                                        ? "border-purple-400/40 bg-purple-800/30 text-purple-300"
+                                        : "border-purple-300 bg-purple-100 text-purple-700"
+                                    : isDark
+                                        ? "border-white/10 bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white"
+                                        : "border-black/10 bg-white/40 text-slate-500 hover:bg-black/[0.05] hover:text-slate-800"
                                     }`}
                             >
                                 <FaTerminal className="text-[14px]" />
@@ -858,15 +863,28 @@ const Navbar = () => {
                                         : "Open ZS Code AI"
                                 }
                                 className={`group relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-md border transition-all duration-300 ${aiOpen
-                                        ? "border-[#F6C76B]/60 bg-gradient-to-br from-[#dfea06] via-[#f07705] to-[#f6028c] shadow-[0_0_12px_rgba(233,185,73,0.3)]"
-                                        : isDark
-                                            ? "border-[#E9B949]/25 bg-gradient-to-br from-[#f8a601] via-[#f65c03] to-[#625080] hover:border-[#F6C76B]/50 hover:shadow-[0_0_14px_rgba(233,185,73,0.25)]"
-                                            : "border-[#D49A32]/35 bg-gradient-to-br from-[#F3D58A] via-[#E7A45D] to-[#B39AD4] hover:shadow-[0_0_12px_rgba(212,154,50,0.2)]"
+                                    ? "border-[#F6C76B]/60 bg-gradient-to-br from-[#dfea06] via-[#f07705] to-[#f6028c] shadow-[0_0_12px_rgba(233,185,73,0.3)]"
+                                    : isDark
+                                        ? "border-[#E9B949]/25 bg-gradient-to-br from-[#f8a601] via-[#f65c03] to-[#625080] hover:border-[#F6C76B]/50 hover:shadow-[0_0_14px_rgba(233,185,73,0.25)]"
+                                        : "border-[#D49A32]/35 bg-gradient-to-br from-[#F3D58A] via-[#E7A45D] to-[#B39AD4] hover:shadow-[0_0_12px_rgba(212,154,50,0.2)]"
                                     }`}
                             >
                                 <VscLightbulbSparkle
                                     className="relative z-10 text-[19px] text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] transition-transform duration-300 group-hover:scale-105"
                                 />
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsDocumentOpen(true)}
+                                title="Open Document"
+                                aria-label="Open Document"
+                                className={`group relative flex h-8 items-center gap-1.5 rounded-md border px-2.5 font-plex text-[15px] transition-all duration-300 ${isDark
+                                        ? "border-0 bg-gradient-to-br from-slate-950 via-blue-900 to-blue-500 hover:scale-105 hover:brightness-150"
+                                        : "border-black/10 bg-white/40 text-slate-500 hover:bg-black/[0.05] hover:text-slate-800"
+                                    }`}
+                            >
+                                <GrDocumentUser className="text-[18px]" />
                             </button>
                         </div>
                     </div>
@@ -881,14 +899,14 @@ const Navbar = () => {
                                     : "Switch to dark mode"
                             }
                             className={`group relative h-6 w-12 overflow-hidden rounded-[20px] border transition-all duration-500 ${isDark
-                                    ? "border-gray-300/10 bg-white/10"
-                                    : "bg-black/15"
+                                ? "border-gray-300/10 bg-white/10"
+                                : "bg-black/15"
                                 }`}
                         >
                             <span
                                 className={`absolute top-0 flex h-full w-6 items-center justify-center rounded-[20px] transition-all duration-500 ${isDark
-                                        ? "left-0 bg-[#3155ff]"
-                                        : "left-6 bg-[#f5b83d] shadow-[0_0_12px_rgba(245,184,61,0.3)]"
+                                    ? "left-0 bg-[#3155ff]"
+                                    : "left-6 bg-[#f5b83d] shadow-[0_0_12px_rgba(245,184,61,0.3)]"
                                     }`}
                             >
                                 {isDark
@@ -931,14 +949,14 @@ const Navbar = () => {
                                         setOpen(prev => !prev)
                                     }
                                     className={`font-plex flex h-11 items-center gap-2 rounded-md border px-1.5 py-1.5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] sm:h-10 sm:gap-2.5 sm:pl-1.5 sm:pr-3 ${isDark
-                                            ? "border-white/20 bg-gradient-to-r from-[#0a1768] via-[#120bd1] to-[#0a1768]/90 text-white"
-                                            : "border-indigo-200/80 bg-gradient-to-r from-[#0212f1] via-[#04bef1] to-[#0212f1] text-white"
+                                        ? "border-white/20 bg-gradient-to-r from-[#0a1768] via-[#120bd1] to-[#0a1768]/90 text-white"
+                                        : "border-indigo-200/80 bg-gradient-to-r from-[#0212f1] via-[#04bef1] to-[#0212f1] text-white"
                                         }`}
                                 >
                                     <div
                                         className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border text-[11px] font-bold sm:h-8 sm:w-8 sm:text-xs ${isDark
-                                                ? "border-white/25 bg-white text-black"
-                                                : "border-black/10 bg-black text-white"
+                                            ? "border-white/25 bg-white text-black"
+                                            : "border-black/10 bg-black text-white"
                                             }`}
                                     >
                                         {user.avatar ? (
@@ -958,8 +976,8 @@ const Navbar = () => {
 
                                     <span
                                         className={`hidden max-w-[100px] truncate text-sm font-semibold sm:block ${isDark
-                                                ? "text-white"
-                                                : "text-black"
+                                            ? "text-white"
+                                            : "text-black"
                                             }`}
                                     >
                                         {getFirstName(user.name)}
@@ -967,8 +985,8 @@ const Navbar = () => {
 
                                     <FaChevronDown
                                         className={`mr-1 text-[10px] transition-transform ${open
-                                                ? "rotate-180"
-                                                : ""
+                                            ? "rotate-180"
+                                            : ""
                                             }`}
                                     />
                                 </button>
@@ -976,20 +994,20 @@ const Navbar = () => {
                                 {open && (
                                     <div
                                         className={`absolute right-0 top-[calc(100%+10px)] w-[300px] overflow-hidden rounded-xl border p-2 effect-less ${isDark
-                                                ? "border-white/15 bg-[#393636]"
-                                                : "border-indigo-100 bg-gradient-to-b from-[#f8fafc]/95 to-[#f1f5f9]/95"
+                                            ? "border-white/15 bg-[#393636]"
+                                            : "border-indigo-100 bg-gradient-to-b from-[#f8fafc]/95 to-[#f1f5f9]/95"
                                             }`}
                                     >
                                         <div
                                             className={`rounded-xl border p-3.5 ${isDark
-                                                    ? "border-white/5 bg-gradient-to-br from-white/10 via-transparent to-transparent"
-                                                    : "border-indigo-200/50 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent"
+                                                ? "border-white/5 bg-gradient-to-br from-white/10 via-transparent to-transparent"
+                                                : "border-indigo-200/50 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent"
                                                 }`}
                                         >
                                             <p
                                                 className={`text-[12px] font-bold font-plex tracking-[0.18em] ${isDark
-                                                        ? "text-white/50"
-                                                        : "text-blue-700"
+                                                    ? "text-white/50"
+                                                    : "text-blue-700"
                                                     }`}
                                             >
                                                 Signed In As
@@ -997,8 +1015,8 @@ const Navbar = () => {
 
                                             <p
                                                 className={`font-plex mt-1 text-3xl tracking-wider ${isDark
-                                                        ? "text-white"
-                                                        : "text-slate-900"
+                                                    ? "text-white"
+                                                    : "text-slate-900"
                                                     }`}
                                             >
                                                 {user.name}
@@ -1006,8 +1024,8 @@ const Navbar = () => {
 
                                             <p
                                                 className={`font-plex mt-0.5 truncate text-[14px] tracking-wider ${isDark
-                                                        ? "text-slate-400"
-                                                        : "text-slate-500"
+                                                    ? "text-slate-400"
+                                                    : "text-slate-500"
                                                     }`}
                                             >
                                                 {user.email}
@@ -1018,8 +1036,8 @@ const Navbar = () => {
                                             type="button"
                                             onClick={handleLogout}
                                             className={`font-tangerine mt-2 flex w-full items-center gap-2.5 rounded-[20px] px-23 py-1 text-2xl font-bold tracking-wider effect-3d transition-all duration-300 ${isDark
-                                                    ? "border-white/10 bg-gradient-to-r from-[#aa3030]/80 to-[#aa3030]/80 text-purple-200 hover:from-rose-500 hover:to-rose-600 hover:text-white"
-                                                    : "border-rose-200/60 bg-gradient-to-r from-rose-50/50 to-slate-100/50 text-rose-600 hover:from-rose-500 hover:to-rose-600 hover:text-white"
+                                                ? "border-white/10 bg-gradient-to-r from-[#aa3030]/80 to-[#aa3030]/80 text-purple-200 hover:from-rose-500 hover:to-rose-600 hover:text-white"
+                                                : "border-rose-200/60 bg-gradient-to-r from-rose-50/50 to-slate-100/50 text-rose-600 hover:from-rose-500 hover:to-rose-600 hover:text-white"
                                                 }`}
                                         >
                                             <FaSignOutAlt className="text-[18px]" />
@@ -1050,10 +1068,15 @@ const Navbar = () => {
             />
 
             <Terminal
-            isOpen={terminalOpen}
-            onClose={() => setTerminalOpen(false)}
+                isOpen={terminalOpen}
+                onClose={() => setTerminalOpen(false)}
             />
-            
+
+            <DocumentPopup
+                isOpen={isDocumentOpen}
+                onClose={() => setIsDocumentOpen(false)}
+            />
+
         </>
     );
 };
