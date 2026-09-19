@@ -14,6 +14,8 @@
   --font-cherry: "Cherry Cream Soda", system-ui; 
   --font-cookie: "Cookie", cursive; 
   --font-lugrasimo: "Lugrasimo", cursive;
+  --font-lobster: "Lobster", sans-serif;
+  --font-pattaya: "Pattaya", sans-serif;
 }
 
 @layer utilities {
@@ -197,5 +199,16 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
