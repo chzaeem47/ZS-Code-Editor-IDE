@@ -2,10 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import http from "http";
 import path from "path";
-import os from "os";
 import fs from "fs/promises";
 import pty from "node-pty";
 import { Server } from "socket.io";
+import {ensureWorkspace,getWorkspaceRoot} from "./services/workspace.service.js";
 
 dotenv.config();
 
@@ -13,7 +13,6 @@ const app = express();
 const port = process.env.PORT || 3005;
 const fileServiceUrl = (process.env.FILE_SERVICE_URL || "http://localhost:3003").replace(/\/$/, "");
 const authServiceUrl = (process.env.AUTH_SERVICE_URL || process.env.AUTH_SERVICE || "http://localhost:3002").replace(/\/$/, "");
-const WORKSPACE_ROOT = path.join(os.tmpdir(), "zs-code");
 const SHELL = process.platform === "win32" ? "powershell.exe" : "bash";
 
 app.use(express.json());
@@ -40,11 +39,6 @@ const safeName = (name) => {
         throw new Error(`Invalid file/folder name: ${value}`);
     }
     return value;
-};
-
-const workspace = (projectId) => {
-    if (!isValidProjectId(projectId)) throw new Error("Invalid project ID");
-    return path.join(WORKSPACE_ROOT, String(projectId));
 };
 
 const normalizeCols = (cols) => {
@@ -131,8 +125,7 @@ const syncProject = async (projectId, userId) => {
         throw new Error("Project not found or access denied");
     }
 
-    const root = workspace(projectId);
-    await fs.mkdir(root, { recursive: true });
+    const root = await ensureWorkspace(projectId);
 
     if (tree.length === 1 && tree[0]?.type === "folder") {
         await writeNodes(tree[0].children || [], root);
@@ -267,11 +260,11 @@ app.get("/health", (req, res) => {
 
 const startServer = async () => {
     try {
-        await fs.mkdir(WORKSPACE_ROOT, { recursive: true });
+        await fs.mkdir(getWorkspaceRoot(),{recursive:true});
 
         server.listen(port, () => {
             console.log(`Terminal Service is running on Port ${port}`);
-            console.log(`Workspace Root: ${WORKSPACE_ROOT}`);
+            console.log(`Workspace Root: ${getWorkspaceRoot()}`);
             console.log(`Shell: ${SHELL}`);
             console.log(`Auth Service: ${authServiceUrl}`);
         });
