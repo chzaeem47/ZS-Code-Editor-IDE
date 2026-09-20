@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3005;
 const fileServiceUrl = (process.env.FILE_SERVICE_URL || "http://localhost:3003").replace(/\/$/, "");
-const authServiceUrl = (process.env.AUTH_SERVICE_URL || process.env.AUTH_SERVICE || "http://localhost:3002").replace(/\/$/, "");
+const authServiceUrl = (process.env.AUTH_SERVICE_URL || process.env.AUTH_SERVICE || "http://localhost:3001").replace(/\/$/, "");
 const SHELL = process.platform === "win32" ? "powershell.exe" : "bash";
 
 app.use(express.json());
@@ -55,26 +55,38 @@ const normalizeRows = (rows) => {
 
 const getAuthenticatedUser = async (socket) => {
     const cookie = socket.handshake.headers.cookie;
-    if (!cookie) throw new Error("Authentication required");
+
+    if (!cookie) {
+        throw new Error("Authentication required");
+    }
 
     const response = await fetch(`${authServiceUrl}/me`, {
-        headers: { cookie }
+        headers: {
+            cookie,
+            "x-user-id": String(socket.handshake.auth?.userId || "")
+        }
     });
 
     const text = await response.text();
     let data = {};
+
     try {
         data = text ? JSON.parse(text) : {};
     } catch {
         throw new Error("Invalid authentication response");
     }
 
-    if (!response.ok) throw new Error(data?.message || "Unauthorized");
+    if (!response.ok) {
+        throw new Error(data?.message || "Unauthorized");
+    }
 
     const user = data?.user || data?.data?.user || data?.data || data;
-    const userId = user?._id || user?.id;
+    const userId = user?._id || user?.id || socket.handshake.auth?.userId;
 
-    if (!userId) throw new Error("Authenticated user ID not found");
+    if (!userId) {
+        throw new Error("Authenticated user ID not found");
+    }
+
     return String(userId);
 };
 
