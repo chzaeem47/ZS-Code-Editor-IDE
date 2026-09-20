@@ -1076,6 +1076,7 @@ const Navbar = () => {
                 onClose={() => setTerminalOpen(false)}
                 projectId={activeProject?._id}
                 userId={user?._id}
+                aiOpen={aiOpen}
             />
 
             <DocumentPopup

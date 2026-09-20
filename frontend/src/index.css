@@ -212,3 +212,16 @@
     display: none;
   }
 }
+
+.xterm {
+    height: 100%;
+    width: 100%;
+}
+
+.xterm-viewport {
+    overflow-y: auto !important;
+}
+
+.xterm-screen {
+    height: 100%;
+}
