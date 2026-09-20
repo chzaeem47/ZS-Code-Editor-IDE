@@ -6,6 +6,10 @@ import fs from "fs/promises";
 import pty from "node-pty";
 import { Server } from "socket.io";
 import {ensureWorkspace,getWorkspaceRoot} from "./services/workspace.service.js";
+import {
+    startFilesystemWatcher,
+    stopFilesystemWatcher
+} from "./services/filesystem-sync.service.js";
 
 dotenv.config();
 
@@ -14,6 +18,7 @@ const port = process.env.PORT || 3005;
 const fileServiceUrl = (process.env.FILE_SERVICE_URL || "http://localhost:3003").replace(/\/$/, "");
 const authServiceUrl = (process.env.AUTH_SERVICE_URL || process.env.AUTH_SERVICE || "http://localhost:3001").replace(/\/$/, "");
 const SHELL = process.platform === "win32" ? "powershell.exe" : "bash";
+const SOCKET_PROTOCOL_VERSION="1.0";
 
 app.use(express.json());
 
@@ -148,8 +153,9 @@ const syncProject = async (projectId, userId) => {
     return { tree, root };
 };
 
-const killSession = (socketId) => {
+const killSession = socketId => {
     const terminalSession = terminalSessions.get(socketId);
+
     if (!terminalSession) return;
 
     try {
@@ -159,71 +165,113 @@ const killSession = (socketId) => {
     terminalSessions.delete(socketId);
 };
 
-io.use(async (socket, next) => {
-    try {
-        const userId = await getAuthenticatedUser(socket);
-        socket.data.userId = userId;
+io.use(async(socket,next)=>{
+    try{
+        const version=socket.handshake.auth?.protocolVersion;
+
+        if(version!==SOCKET_PROTOCOL_VERSION){
+            return next(new Error("Unsupported socket protocol version"));
+        }
+
+        const userId=await getAuthenticatedUser(socket);
+        socket.data.userId=userId;
         next();
-    } catch (error) {
+    }catch(error){
         console.error(`Socket authentication failed: ${error.message}`);
-        next(new Error(error.message || "Unauthorized"));
+        next(new Error(error.message||"Unauthorized"));
     }
 });
 
 io.on("connection", (socket) => {
     console.log(`Terminal Connected: ${socket.id} | User: ${socket.data.userId}`);
 
-    socket.on("terminal:init", async (data = {}) => {
-        try {
-            const projectId = String(data.projectId || "");
-            const userId = socket.data.userId;
+    socket.on("terminal:init",async(data={},ack)=>{
+    try{
+        const projectId=String(data.projectId||"");
+        const userId=socket.data.userId;
 
-            if (!projectId || !userId) {
-                throw new Error("Project ID and authenticated user are required");
-            }
-
-            const cols = normalizeCols(data.cols);
-            const rows = normalizeRows(data.rows);
-            const { root } = await syncProject(projectId, userId);
-
-            killSession(socket.id);
-
-            const ptyProcess = pty.spawn(SHELL, [], {
-                name: "xterm-256color",
-                cols,
-                rows,
-                cwd: root,
-                env: {
-                    ...process.env,
-                    FORCE_COLOR: "1"
-                }
-            });
-
-            ptyProcess.onData((data) => send(socket, data));
-
-            ptyProcess.onExit(({ exitCode }) => {
-                send(socket, `\r\n\x1b[90m[shell exited: ${exitCode}]\x1b[0m\r\n`);
-                const terminalSession = terminalSessions.get(socket.id);
-                if (terminalSession?.ptyProcess === ptyProcess) {
-                    terminalSessions.delete(socket.id);
-                }
-            });
-
-            terminalSessions.set(socket.id, {
-                projectId,
-                userId,
-                cwd: root,
-                ptyProcess
-            });
-
-            socket.emit("terminal:ready", { cols, rows, cwd: root });
-            console.log(`Terminal Ready: ${socket.id} → ${root}`);
-        } catch (error) {
-            console.error("terminal:init error:", error);
-            send(socket, `\r\n\x1b[31m${error.message}\x1b[0m\r\n`);
-            socket.emit("terminal:error", { message: error.message });
+        if(!projectId||!userId){
+            throw new Error("Project ID and authenticated user are required");
         }
-    });
+
+        if(!isValidProjectId(projectId)){
+            throw new Error("Invalid project ID");
+        }
+
+        const cols=normalizeCols(data.cols);
+        const rows=normalizeRows(data.rows);
+        const {root}=await syncProject(projectId,userId);
+
+        startFilesystemWatcher({
+            projectId,
+            userId,
+            root,
+            fileServiceUrl
+        });
+
+        killSession(socket.id);
+
+        const ptyProcess=pty.spawn(SHELL,["-NoLogo","-NoProfile","-NoExit"],{
+            name:"xterm-256color",
+            cols,
+            rows,
+            cwd:root,
+            env:{
+                ...process.env,
+                FORCE_COLOR:"1"
+            }
+        });
+
+        ptyProcess.onData(data=>send(socket,data));
+
+        ptyProcess.onExit(({exitCode})=>{
+            send(socket,`\r\n\x1b[90m[shell exited: ${exitCode}]\x1b[0m\r\n`);
+
+            const session=terminalSessions.get(socket.id);
+
+            if(session?.ptyProcess===ptyProcess){
+                terminalSessions.delete(socket.id);
+            }
+        });
+
+        terminalSessions.set(socket.id,{
+            projectId,
+            userId,
+            cwd:root,
+            ptyProcess
+        });
+
+        socket.emit("terminal:ready",{
+            protocolVersion:SOCKET_PROTOCOL_VERSION,
+            cols,
+            rows,
+            cwd:root
+        });
+
+        ack?.({
+            success:true,
+            projectId,
+            cwd:root
+        });
+
+        console.log(`Terminal Ready: ${socket.id} → ${root}`);
+    }catch(error){
+        console.error("terminal:init error:",error);
+
+        send(socket,`\r\n\x1b[31m${error.message}\x1b[0m\r\n`);
+
+        socket.emit("terminal:error",{
+            code:"TERMINAL_ERROR",
+            message:error.message
+        });
+
+        ack?.({
+            success:false,
+            code:"TERMINAL_INIT_FAILED",
+            message:error.message
+        });
+    }
+});
 
     socket.on("terminal:write", (data) => {
         const terminalSession = terminalSessions.get(socket.id);
