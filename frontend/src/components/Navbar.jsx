@@ -819,9 +819,13 @@ const Navbar = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setTerminalOpen(prev => !prev)
-                                }
+                                onClick={() => {
+                                    if (!activeProject?._id) {
+                                        toast.info("Open a project first.");
+                                        return;
+                                    }
+                                    setTerminalOpen(prev => !prev);
+                                }}
                                 title={
                                     terminalOpen
                                         ? "Close Terminal"
@@ -880,8 +884,8 @@ const Navbar = () => {
                                 title="Open Document"
                                 aria-label="Open Document"
                                 className={`group relative flex h-8 items-center gap-1.5 rounded-md border px-2.5 font-plex text-[15px] transition-all duration-300 ${isDark
-                                        ? "border-0 bg-gradient-to-br from-slate-950 via-blue-900 to-blue-500 hover:scale-105 hover:brightness-150"
-                                        : "border-black/10 bg-white/40 text-slate-500 hover:bg-black/[0.05] hover:text-slate-800"
+                                    ? "border-0 bg-gradient-to-br from-slate-950 via-blue-900 to-blue-500 hover:scale-105 hover:brightness-150"
+                                    : "border-black/10 bg-white/40 text-slate-500 hover:bg-black/[0.05] hover:text-slate-800"
                                     }`}
                             >
                                 <GrDocumentUser className="text-[18px]" />
@@ -1070,6 +1074,8 @@ const Navbar = () => {
             <Terminal
                 isOpen={terminalOpen}
                 onClose={() => setTerminalOpen(false)}
+                projectId={activeProject?._id}
+                userId={user?._id}
             />
 
             <DocumentPopup
