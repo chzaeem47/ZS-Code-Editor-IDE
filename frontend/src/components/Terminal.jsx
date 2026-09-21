@@ -107,20 +107,6 @@ const Terminal = ({ isOpen, onClose, projectId, userId, aiOpen }) => {
             });
         });
 
-        socket.on("disconnect", async reason => {
-            const session = terminalSessions.get(socket.id);
-
-            console.log(
-                `Terminal Disconnected: ${socket.id} | ${reason}`
-            );
-
-            if (session?.projectId) {
-                await stopFilesystemWatcher(session.projectId);
-            }
-
-            killSession(socket.id);
-        });
-
         socket.io.on("reconnect_attempt", attempt => {
             term.write(`\r\n\x1b[90m[Reconnecting... ${attempt}]\x1b[0m\r\n`);
         });
@@ -169,14 +155,6 @@ const Terminal = ({ isOpen, onClose, projectId, userId, aiOpen }) => {
                         <FaTerminal className="text-[12px]" />
                         <span>Terminal</span>
                     </div>
-                </div>
-                <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => setMaximized(p => !p)} title={maximized ? "Restore" : "Maximize"} className={`flex h-7 w-7 items-center justify-center rounded-md ${isDark ? "text-white/50 hover:bg-white/10 hover:text-white" : "text-slate-500 hover:bg-black/5 hover:text-slate-800"}`}>
-                        <FaExpandAlt className="text-[11px]" />
-                    </button>
-                    <button type="button" onClick={onClose} title="Close terminal" className={`flex h-7 w-7 items-center justify-center rounded-md ${isDark ? "text-white/50 hover:bg-white/10 hover:text-white" : "text-slate-500 hover:bg-black/5 hover:text-slate-800"}`}>
-                        <FaTimes className="text-[13px]" />
-                    </button>
                 </div>
             </div>
 

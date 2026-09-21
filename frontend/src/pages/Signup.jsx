@@ -119,7 +119,7 @@ const Signup = () => {
       ).unwrap();
 
       toast.success("Google login successful!", {
-        position: "top-right",
+        position: "bottom-right",
         autoClose: 2500,
       });
 
@@ -133,7 +133,7 @@ const Signup = () => {
         "Google authentication failed.";
 
       toast.error(message, {
-        position: "top-right",
+        position: "bottom-right",
         autoClose: 3000,
       });
     }
