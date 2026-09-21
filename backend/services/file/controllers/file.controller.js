@@ -586,3 +586,100 @@ const getDescendantIds = async (parentId) => {
 
     return descendants;
 };
+
+/*
+* SYNC TREE CONTROLLER
+*/
+export const syncTree=async(req,res)=>{
+    try{
+        const userId=req.headers["x-user-id"];
+        const {projectId}=req.params;
+        const {tree=[]}=req.body;
+
+        if(!userId) return res.status(401).json({message:"User ID is required."});
+        if(!mongoose.Types.ObjectId.isValid(projectId)) return res.status(400).json({message:"Invalid project ID."});
+        if(!Array.isArray(tree)) return res.status(400).json({message:"Tree must be an array."});
+
+        const root=await fileModel.findOne({
+            projectId,
+            owner:userId,
+            parentId:null,
+            type:"folder",
+            isDeleted:false
+        });
+
+        if(!root) return res.status(404).json({message:"Project root folder not found."});
+
+        const keepIds=[root._id];
+
+        const syncNodes=async(nodes,parentId)=>{
+            for(const node of nodes){
+                if(!node?.name||!["file","folder"].includes(node.type)) continue;
+
+                const existing=await fileModel.findOne({
+                    projectId,
+                    owner:userId,
+                    parentId,
+                    name:node.name,
+                    isDeleted:false
+                });
+
+                if(existing&&existing.type!==node.type){
+                    existing.isDeleted=true;
+                    await existing.save();
+                }
+
+                const file=existing&&existing.type===node.type
+                    ? existing
+                    : await fileModel.create({
+                        projectId,
+                        owner:userId,
+                        parentId,
+                        name:node.name,
+                        type:node.type,
+                        content:node.type==="file"?(node.content||""):undefined,
+                        extension:node.type==="file"&&node.name.includes(".")
+                            ?node.name.split(".").pop().toLowerCase()
+                            :"",
+                        size:node.type==="file"?(node.content||"").length:0
+                    });
+
+                if(node.type==="file"){
+                    file.content=node.content||"";
+                    file.size=file.content.length;
+                    file.isDeleted=false;
+                    await file.save();
+                }
+
+                keepIds.push(file._id);
+
+                if(node.type==="folder"){
+                    file.isDeleted=false;
+                    await file.save();
+                    await syncNodes(node.children||[],file._id);
+                }
+            }
+        };
+
+        await syncNodes(tree,root._id);
+
+        await fileModel.updateMany(
+            {
+                projectId,
+                owner:userId,
+                isDeleted:false,
+                _id:{$nin:keepIds}
+            },
+            {$set:{isDeleted:true}}
+        );
+
+        return res.status(200).json({
+            success:true,
+            message:"Filesystem synchronized with database.",
+            count:keepIds.length
+        });
+    }catch(error){
+        console.error("Filesystem Sync Error:",error);
+        return res.status(500).json({message:"Unable to synchronize filesystem."});
+    }
+};

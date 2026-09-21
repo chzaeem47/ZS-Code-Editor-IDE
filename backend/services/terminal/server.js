@@ -5,10 +5,11 @@ import path from "path";
 import fs from "fs/promises";
 import pty from "node-pty";
 import { Server } from "socket.io";
-import {ensureWorkspace,getWorkspaceRoot} from "./services/workspace.service.js";
+import { ensureWorkspace, getWorkspaceRoot } from "./services/workspace.service.js";
 import {
     startFilesystemWatcher,
-    stopFilesystemWatcher
+    stopFilesystemWatcher,
+    stopAllFilesystemWatchers
 } from "./services/filesystem-sync.service.js";
 
 dotenv.config();
@@ -18,7 +19,7 @@ const port = process.env.PORT || 3005;
 const fileServiceUrl = (process.env.FILE_SERVICE_URL || "http://localhost:3003").replace(/\/$/, "");
 const authServiceUrl = (process.env.AUTH_SERVICE_URL || process.env.AUTH_SERVICE || "http://localhost:3001").replace(/\/$/, "");
 const SHELL = process.platform === "win32" ? "powershell.exe" : "bash";
-const SOCKET_PROTOCOL_VERSION="1.0";
+const SOCKET_PROTOCOL_VERSION = "1.0";
 
 app.use(express.json());
 
@@ -160,118 +161,164 @@ const killSession = socketId => {
 
     try {
         terminalSession.ptyProcess.kill();
-    } catch {}
+    } catch { }
 
     terminalSessions.delete(socketId);
 };
 
-io.use(async(socket,next)=>{
-    try{
-        const version=socket.handshake.auth?.protocolVersion;
+io.use(async (socket, next) => {
+    try {
+        const version = socket.handshake.auth?.protocolVersion;
 
-        if(version!==SOCKET_PROTOCOL_VERSION){
+        if (version !== SOCKET_PROTOCOL_VERSION) {
             return next(new Error("Unsupported socket protocol version"));
         }
 
-        const userId=await getAuthenticatedUser(socket);
-        socket.data.userId=userId;
+        const userId = await getAuthenticatedUser(socket);
+        socket.data.userId = userId;
         next();
-    }catch(error){
+    } catch (error) {
         console.error(`Socket authentication failed: ${error.message}`);
-        next(new Error(error.message||"Unauthorized"));
+        next(new Error(error.message || "Unauthorized"));
     }
 });
 
 io.on("connection", (socket) => {
     console.log(`Terminal Connected: ${socket.id} | User: ${socket.data.userId}`);
 
-    socket.on("terminal:init",async(data={},ack)=>{
-    try{
-        const projectId=String(data.projectId||"");
-        const userId=socket.data.userId;
+    socket.on("terminal:init", async (data = {}, ack) => {
+        try {
+            const projectId = String(data.projectId || "");
+            const userId = socket.data.userId;
 
-        if(!projectId||!userId){
-            throw new Error("Project ID and authenticated user are required");
-        }
-
-        if(!isValidProjectId(projectId)){
-            throw new Error("Invalid project ID");
-        }
-
-        const cols=normalizeCols(data.cols);
-        const rows=normalizeRows(data.rows);
-        const {root}=await syncProject(projectId,userId);
-
-        startFilesystemWatcher({
-            projectId,
-            userId,
-            root,
-            fileServiceUrl
-        });
-
-        killSession(socket.id);
-
-        const ptyProcess=pty.spawn(SHELL,["-NoLogo","-NoProfile","-NoExit"],{
-            name:"xterm-256color",
-            cols,
-            rows,
-            cwd:root,
-            env:{
-                ...process.env,
-                FORCE_COLOR:"1"
+            if (!projectId || !userId) {
+                throw new Error(
+                    "Project ID and authenticated user are required"
+                );
             }
-        });
 
-        ptyProcess.onData(data=>send(socket,data));
-
-        ptyProcess.onExit(({exitCode})=>{
-            send(socket,`\r\n\x1b[90m[shell exited: ${exitCode}]\x1b[0m\r\n`);
-
-            const session=terminalSessions.get(socket.id);
-
-            if(session?.ptyProcess===ptyProcess){
-                terminalSessions.delete(socket.id);
+            if (!isValidProjectId(projectId)) {
+                throw new Error("Invalid project ID");
             }
-        });
 
-        terminalSessions.set(socket.id,{
-            projectId,
-            userId,
-            cwd:root,
-            ptyProcess
-        });
+            const cols = normalizeCols(data.cols);
+            const rows = normalizeRows(data.rows);
 
-        socket.emit("terminal:ready",{
-            protocolVersion:SOCKET_PROTOCOL_VERSION,
-            cols,
-            rows,
-            cwd:root
-        });
+            const existingSession = terminalSessions.get(socket.id);
 
-        ack?.({
-            success:true,
-            projectId,
-            cwd:root
-        });
+            if (existingSession) {
+                await stopFilesystemWatcher(
+                    existingSession.projectId,
+                    socket.id
+                );
 
-        console.log(`Terminal Ready: ${socket.id} → ${root}`);
-    }catch(error){
-        console.error("terminal:init error:",error);
+                killSession(socket.id);
+            }
 
-        send(socket,`\r\n\x1b[31m${error.message}\x1b[0m\r\n`);
+            const { root } = await syncProject(
+                projectId,
+                userId
+            );
 
-        socket.emit("terminal:error",{
-            code:"TERMINAL_ERROR",
-            message:error.message
-        });
+            await startFilesystemWatcher({
+                projectId,
+                userId,
+                root,
+                fileServiceUrl,
+                clientId: socket.id
+            });
 
-        ack?.({
-            success:false,
-            code:"TERMINAL_INIT_FAILED",
-            message:error.message
-        });
-    }
-});
+            const ptyProcess = pty.spawn(
+                SHELL,
+                ["-NoLogo", "-NoProfile", "-NoExit"],
+                {
+                    name: "xterm-256color",
+                    cols,
+                    rows,
+                    cwd: root,
+                    env: {
+                        ...process.env,
+                        FORCE_COLOR: "1"
+                    }
+                }
+            );
+
+            ptyProcess.onData(data => {
+                send(socket, data);
+            });
+
+            ptyProcess.onExit(
+                ({ exitCode }) => {
+                    send(
+                        socket,
+                        `\r\n\x1b[90m[shell exited: ${exitCode}]\x1b[0m\r\n`
+                    );
+
+                    const session =
+                        terminalSessions.get(socket.id);
+
+                    if (session?.ptyProcess === ptyProcess) {
+                        terminalSessions.delete(socket.id);
+
+                        stopFilesystemWatcher(
+                            session.projectId,
+                            socket.id
+                        ).catch(error => {
+                            console.error(
+                                `Watcher cleanup failed for ${session.projectId}:`,
+                                error.message
+                            );
+                        });
+                    }
+                }
+            );
+
+            terminalSessions.set(socket.id, {
+                projectId,
+                userId,
+                cwd: root,
+                ptyProcess
+            });
+
+            socket.emit("terminal:ready", {
+                protocolVersion: SOCKET_PROTOCOL_VERSION,
+                cols,
+                rows,
+                cwd: root
+            });
+
+            ack?.({
+                success: true,
+                projectId,
+                cwd: root
+            });
+
+            console.log(
+                `Terminal Ready: ${socket.id} → ${root}`
+            );
+        } catch (error) {
+            console.error(
+                "terminal:init error:",
+                error
+            );
+
+            send(
+                socket,
+                `\r\n\x1b[31m${error.message}\x1b[0m\r\n`
+            );
+
+            socket.emit("terminal:error", {
+                code: "TERMINAL_ERROR",
+                message: error.message
+            });
+
+            ack?.({
+                success: false,
+                code: "TERMINAL_INIT_FAILED",
+                message: error.message
+            });
+        }
+    });
 
     socket.on("terminal:write", (data) => {
         const terminalSession = terminalSessions.get(socket.id);
@@ -298,15 +345,41 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("terminal:restart", () => {
-        if (!terminalSessions.has(socket.id)) return;
+    socket.on("terminal:restart", async () => {
+        const session = terminalSessions.get(socket.id);
+
+        if (!session) return;
+
         killSession(socket.id);
+
+        await stopFilesystemWatcher(
+            session.projectId,
+            socket.id
+        );
+
         socket.emit("terminal:restart");
     });
 
-    socket.on("disconnect", (reason) => {
-        console.log(`Terminal Disconnected: ${socket.id} | ${reason}`);
+    socket.on("disconnect", reason => {
+        console.log(
+            `Terminal Disconnected: ${socket.id} | ${reason}`
+        );
+
+        const session = terminalSessions.get(socket.id);
+
         killSession(socket.id);
+
+        if (session?.projectId) {
+            stopFilesystemWatcher(
+                session.projectId,
+                socket.id
+            ).catch(error => {
+                console.error(
+                    `Watcher cleanup failed for ${session.projectId}:`,
+                    error.message
+                );
+            });
+        }
     });
 });
 
@@ -320,7 +393,7 @@ app.get("/health", (req, res) => {
 
 const startServer = async () => {
     try {
-        await fs.mkdir(getWorkspaceRoot(),{recursive:true});
+        await fs.mkdir(getWorkspaceRoot(), { recursive: true });
 
         server.listen(port, () => {
             console.log(`Terminal Service is running on Port ${port}`);
@@ -334,8 +407,13 @@ const startServer = async () => {
     }
 };
 
-const shutdown = () => {
-    for (const socketId of terminalSessions.keys()) killSession(socketId);
+const shutdown = async () => {
+    for (const socketId of terminalSessions.keys()) {
+        killSession(socketId);
+    }
+
+    await stopAllFilesystemWatchers();
+
     server.close(() => process.exit(0));
 };
 

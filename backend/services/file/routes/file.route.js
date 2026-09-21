@@ -1,7 +1,6 @@
 import express from "express";
 
-import {createRootFolder,createFolder,createFile,updateFile,deleteFile,getFile,getTree} from "../controllers/file.controller.js";
-
+import {createRootFolder,createFolder,createFile,updateFile,deleteFile,getFile,getTree,syncTree} from "../controllers/file.controller.js";
 const router = express.Router();
 
 
@@ -36,6 +35,11 @@ router.patch( "/update/:id", updateFile );
 router.get( "/tree/:projectId", getTree);
 
 /*
+* SYNC PROJECT BY ID
+*/
+router.post("/sync/:projectId",syncTree);
+
+/*
 * GET FILE
 * - /api/file/:id
 */
@@ -46,5 +50,6 @@ router.get("/:id",getFile);
 * - /api/file/:id
 */
 router.delete("/:id", deleteFile);
+
 
 export default router;
