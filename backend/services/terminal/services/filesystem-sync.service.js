@@ -126,11 +126,13 @@ const syncToDatabase = async ({
         );
     }
 
-    return data;
+    return {
+        data , tree
+    };
 };
 
 const performSync = async context => {
-    const { projectId } = context;
+    const { projectId, onSynced } = context;
 
     let state = syncStates.get(projectId);
 
@@ -154,11 +156,14 @@ const performSync = async context => {
         do {
             state.pending = false;
 
-            await syncToDatabase(context);
+            const result = await syncToDatabase(context);
 
-            console.log(
-                `Filesystem → DB synced: ${projectId}`
-            );
+            console.log(`Filesystem → DB synced: ${projectId}`);
+
+            await onSynced?.({
+                projectId,
+                tree: result?.tree || null
+            });
         } while (state.pending);
     } catch (error) {
         console.error(
@@ -196,7 +201,8 @@ export const startFilesystemWatcher = async ({
     userId,
     root,
     fileServiceUrl,
-    clientId
+    clientId,
+    onSynced
 }) => {
     const clientKey = String(clientId || projectId);
 
@@ -270,7 +276,8 @@ export const startFilesystemWatcher = async ({
             projectId,
             userId,
             root: watchRoot,
-            fileServiceUrl
+            fileServiceUrl,
+            onSynced
         });
     };
 
