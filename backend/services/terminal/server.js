@@ -12,6 +12,16 @@ import {
     stopAllFilesystemWatchers
 } from "./services/filesystem-sync.service.js";
 
+import {
+    startProcess,
+    stopProcess,
+    getProcess,
+    getProjectProcesses,
+    stopProjectProcesses,
+    stopSocketProcesses,
+    cleanupFinishedProcesses
+} from "./services/process.service.js";
+
 dotenv.config();
 
 const app = express();
@@ -186,6 +196,110 @@ io.use(async (socket, next) => {
 io.on("connection", (socket) => {
     console.log(`Terminal Connected: ${socket.id} | User: ${socket.data.userId}`);
 
+    socket.on("process:start", async (data = {}, ack) => {
+        try {
+            const projectId = String(data.projectId || "");
+            const userId = socket.data.userId;
+
+            if (!projectId || !userId) {
+                throw new Error(
+                    "Project ID and authenticated user are required"
+                );
+            }
+
+            if (!isValidProjectId(projectId)) {
+                throw new Error("Invalid project ID");
+            }
+
+            const session = terminalSessions.get(socket.id);
+
+            if (
+                !session ||
+                session.projectId !== projectId
+            ) {
+                throw new Error(
+                    "Terminal session is not ready"
+                );
+            }
+
+            const processId =
+                `${projectId}:${Date.now()}:${Math.random()
+                    .toString(36)
+                    .slice(2, 8)}`;
+
+            const result = await startProcess({
+                processId,
+                projectId,
+                userId,
+                socketId: socket.id,
+                command: String(data.command || ""),
+                args: Array.isArray(data.args)
+                    ? data.args
+                    : [],
+                cwd: session.cwd,
+
+                onData: output => {
+                    socket.emit("process:data", {
+                        processId,
+                        data: output
+                    });
+
+                    socket.emit("terminal:data", output);
+                },
+
+                onExit: result => {
+                    socket.emit(
+                        "process:exit",
+                        result
+                    );
+                }
+            });
+
+            socket.emit(
+                "process:started",
+                result
+            );
+
+            ack?.({
+                success: true,
+                process: result
+            });
+        } catch (error) {
+            ack?.({
+                success: false,
+                message: error.message
+            });
+        }
+    });
+
+    socket.on("process:stop", async (data = {}, ack) => {
+        try {
+            const result = await stopProcess(
+                String(data.processId || ""),
+                socket.data.userId
+            );
+
+            ack?.({
+                success: result,
+                message: result ? "Process stopped" : "Process not found"
+            });
+        } catch (error) {
+            ack?.({
+                success: false,
+                message: error.message
+            });
+        }
+    });
+
+    socket.on("process:list", data => {
+        const projectId = String(data?.projectId || "");
+
+        socket.emit("process:list", {
+            projectId,
+            processes: getProjectProcesses(projectId, socket.data.userId)
+        });
+    });
+
     socket.on("terminal:init", async (data = {}, ack) => {
         try {
             const projectId = String(data.projectId || "");
@@ -207,6 +321,8 @@ io.on("connection", (socket) => {
             const existingSession = terminalSessions.get(socket.id);
 
             if (existingSession) {
+                socket.leave(`project:${existingSession.projectId}`);
+
                 await stopFilesystemWatcher(
                     existingSession.projectId,
                     socket.id
@@ -214,6 +330,8 @@ io.on("connection", (socket) => {
 
                 killSession(socket.id);
             }
+
+            socket.join(`project:${projectId}`);
 
             const { root } = await syncProject(
                 projectId,
@@ -225,7 +343,17 @@ io.on("connection", (socket) => {
                 userId,
                 root,
                 fileServiceUrl,
-                clientId: socket.id
+                clientId: socket.id,
+                onSynced: ({ projectId }) => {
+                    io.to(`project:${projectId}`).emit(
+                        "workspace:changed",
+                        {
+                            projectId,
+                            source: "filesystem",
+                            timestamp: Date.now()
+                        }
+                    );
+                }
             });
 
             const ptyProcess = pty.spawn(
@@ -350,6 +478,15 @@ io.on("connection", (socket) => {
 
         if (!session) return;
 
+        try {
+            await stopSocketProcesses(socket.id);
+        } catch (error) {
+            console.error(
+                `Process cleanup failed during restart for ${socket.id}:`,
+                error.message
+            );
+        }
+
         killSession(socket.id);
 
         await stopFilesystemWatcher(
@@ -365,9 +502,17 @@ io.on("connection", (socket) => {
             `Terminal Disconnected: ${socket.id} | ${reason}`
         );
 
-        const session = terminalSessions.get(socket.id);
+        const session =
+            terminalSessions.get(socket.id);
 
         killSession(socket.id);
+
+        stopSocketProcesses(socket.id).catch(error => {
+            console.error(
+                `Process cleanup failed for socket ${socket.id}:`,
+                error.message
+            );
+        });
 
         if (session?.projectId) {
             stopFilesystemWatcher(
@@ -419,5 +564,12 @@ const shutdown = async () => {
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
+
+const processCleanupTimer =
+    setInterval(() => {
+        cleanupFinishedProcesses();
+    }, 5 * 60 * 1000);
+
+processCleanupTimer.unref();
 
 startServer();

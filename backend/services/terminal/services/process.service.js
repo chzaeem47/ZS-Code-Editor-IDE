@@ -1,154 +1,334 @@
-import { spawn } from "child_process";
+import { spawn, execFile } from "child_process";
 
 const processes = new Map();
 
-const getCommand = (command, args = []) => {
-    if (Array.isArray(args) && args.length) return `${command} ${args.join(" ")}`;
-    return command;
+const MAX_PROCESSES_PER_PROJECT = 10;
+
+const normalizeCommand = command => {
+    const value = String(command || "").trim();
+
+    if (!value) {
+        throw new Error("Process command is required");
+    }
+
+    if (process.platform === "win32") {
+        const windowsCommands = new Set([
+            "npm",
+            "npx",
+            "pnpm",
+            "yarn"
+        ]);
+
+        if (windowsCommands.has(value.toLowerCase())) {
+            return `${value}.cmd`;
+        }
+    }
+
+    return value;
 };
+
+const serializeProcess = processInfo => ({
+    processId: processInfo.processId,
+    projectId: processInfo.projectId,
+    userId: processInfo.userId,
+    socketId: processInfo.socketId,
+    pid: processInfo.pid,
+    command: processInfo.command,
+    args: processInfo.args,
+    cwd: processInfo.cwd,
+    status: processInfo.status,
+    startedAt: processInfo.startedAt,
+    finishedAt: processInfo.finishedAt || null,
+    exitCode: processInfo.exitCode ?? null,
+    signal: processInfo.signal || null
+});
 
 export const startProcess = async ({
     processId,
     projectId,
+    userId,
+    socketId,
     command,
     args = [],
     cwd,
-    env = {},
     onData,
     onExit
 }) => {
-    if (!processId) throw new Error("Process ID is required");
-    if (!projectId) throw new Error("Project ID is required");
-    if (!command) throw new Error("Command is required");
-    if (processes.has(processId)) throw new Error("Process already exists");
+    if (!processId) {
+        throw new Error("Process ID is required");
+    }
 
-    const child = spawn(command, args, {
-        cwd,
-        env: { ...process.env, ...env },
-        shell: process.platform === "win32",
-        windowsHide: true
-    });
+    if (!projectId) {
+        throw new Error("Project ID is required");
+    }
 
-    const record = {
-        processId,
-        projectId,
-        command: getCommand(command, args),
+    if (!userId) {
+        throw new Error("User ID is required");
+    }
+
+    if (!cwd) {
+        throw new Error("Working directory is required");
+    }
+
+    const projectProcesses = [...processes.values()].filter(
+        item =>
+            item.projectId === String(projectId) &&
+            item.userId === String(userId) &&
+            ["starting", "running"].includes(item.status)
+    );
+
+    if (projectProcesses.length >= MAX_PROCESSES_PER_PROJECT) {
+        throw new Error(
+            `Maximum ${MAX_PROCESSES_PER_PROJECT} processes allowed per project`
+        );
+    }
+
+    const executable = normalizeCommand(command);
+
+    const normalizedArgs = Array.isArray(args)
+        ? args.map(value => String(value))
+        : [];
+
+    const child = spawn(
+        executable,
+        normalizedArgs,
+        {
+            cwd,
+            env: {
+                ...process.env,
+                FORCE_COLOR: "1"
+            },
+            shell: false,
+            windowsHide: true,
+            detached: process.platform !== "win32"
+        }
+    );
+
+    const processInfo = {
+        processId: String(processId),
+        projectId: String(projectId),
+        userId: String(userId),
+        socketId: String(socketId || ""),
         pid: child.pid,
-        status: "running",
-        child,
+        command: executable,
+        args: normalizedArgs,
         cwd,
-        env,
-        onData,
-        onExit,
-        startedAt: Date.now()
+        status: "starting",
+        startedAt: Date.now(),
+        finishedAt: null,
+        exitCode: null,
+        signal: null,
+        child
     };
 
-    processes.set(processId, record);
+    processes.set(
+        processInfo.processId,
+        processInfo
+    );
 
     child.stdout?.on("data", data => {
-        onData?.(String(data));
+        if (processInfo.status === "starting") {
+            processInfo.status = "running";
+        }
+
+        onData?.(data.toString());
     });
 
     child.stderr?.on("data", data => {
-        onData?.(String(data));
+        if (processInfo.status === "starting") {
+            processInfo.status = "running";
+        }
+
+        onData?.(data.toString());
     });
 
     child.on("error", error => {
-        record.status = "error";
-        onData?.(`\r\n[Process Error] ${error.message}\r\n`);
+        processInfo.status = "failed";
+        processInfo.finishedAt = Date.now();
+
+        onData?.(
+            `\r\n\x1b[31m[Process Error] ${error.message}\x1b[0m\r\n`
+        );
     });
 
-    child.on("exit", (code, signal) => {
-        record.status = "stopped";
-        record.exitCode = code;
-        record.signal = signal;
-        record.endedAt = Date.now();
+    child.on("spawn", () => {
+        processInfo.status = "running";
+    });
+
+    child.on("exit", (exitCode, signal) => {
+        processInfo.status =
+            signal || processInfo.status === "stopping"
+                ? "stopped"
+                : "exited";
+
+        processInfo.finishedAt = Date.now();
+        processInfo.exitCode = exitCode;
+        processInfo.signal = signal;
 
         onExit?.({
-            processId,
-            projectId,
-            code,
+            ...serializeProcess(processInfo),
+            exitCode,
             signal
         });
     });
 
-    return getProcess(processId);
+    return serializeProcess(processInfo);
 };
 
-export const stopProcess = async processId => {
-    const record = processes.get(processId);
+export const getProcess = processId => {
+    const processInfo = processes.get(String(processId));
 
-    if (!record) return false;
+    if (!processInfo) {
+        return null;
+    }
 
-    try {
-        record.child.kill();
-    } catch { }
+    return serializeProcess(processInfo);
+};
 
-    record.status = "stopped";
+export const getProjectProcesses = (
+    projectId,
+    userId
+) => {
+    return [...processes.values()]
+        .filter(processInfo =>
+            processInfo.projectId === String(projectId) &&
+            (!userId ||
+                processInfo.userId === String(userId))
+        )
+        .sort((a, b) =>
+            b.startedAt - a.startedAt
+        )
+        .map(serializeProcess);
+};
+
+export const stopProcess = async (
+    processId,
+    userId
+) => {
+    const processInfo =
+        processes.get(String(processId));
+
+    if (!processInfo) {
+        return false;
+    }
+
+    if (
+        userId &&
+        processInfo.userId !== String(userId)
+    ) {
+        throw new Error("Process access denied");
+    }
+
+    if (
+        ["exited", "stopped", "failed"].includes(
+            processInfo.status
+        )
+    ) {
+        return true;
+    }
+
+    processInfo.status = "stopping";
+
+    const pid = processInfo.pid;
+
+    if (!pid) {
+        return false;
+    }
+
+    await new Promise(resolve => {
+        if (process.platform === "win32") {
+            execFile(
+                "taskkill",
+                ["/PID", String(pid), "/T", "/F"],
+                () => resolve()
+            );
+            return;
+        }
+
+        try {
+            process.kill(
+                -pid,
+                "SIGTERM"
+            );
+        } catch {
+            try {
+                process.kill(
+                    pid,
+                    "SIGTERM"
+                );
+            } catch {}
+        }
+
+        resolve();
+    });
 
     return true;
 };
 
-export const restartProcess = async processId => {
-    const record = processes.get(processId);
-
-    if (!record) throw new Error("Process not found");
-
-    const config = {
-        processId,
-        projectId: record.projectId,
-        command: record.command,
-        cwd: record.cwd,
-        env: record.env,
-        onData: record.onData,
-        onExit: record.onExit
-    };
-
-    await stopProcess(processId);
-    processes.delete(processId);
-
-    return startProcess(config);
-};
-
-export const getProcess = processId => {
-    const record = processes.get(processId);
-
-    if (!record) return null;
-
-    return {
-        processId: record.processId,
-        projectId: record.projectId,
-        command: record.command,
-        pid: record.pid,
-        status: record.status,
-        startedAt: record.startedAt,
-        exitCode: record.exitCode,
-        signal: record.signal,
-        endedAt: record.endedAt
-    };
-};
-
-export const getProjectProcesses = projectId => {
-    return [...processes.values()]
-        .filter(process => process.projectId === projectId)
-        .map(process => ({
-            processId: process.processId,
-            projectId: process.projectId,
-            command: process.command,
-            pid: process.pid,
-            status: process.status,
-            startedAt: process.startedAt,
-            exitCode: process.exitCode,
-            signal: process.signal,
-            endedAt: process.endedAt
-        }));
-};
-
-export const stopProjectProcesses = async projectId => {
-    const projectProcesses = [...processes.values()]
-        .filter(process => process.projectId === projectId);
+export const stopProjectProcesses = async (
+    projectId,
+    userId
+) => {
+    const projectProcesses =
+        getProjectProcesses(
+            projectId,
+            userId
+        );
 
     await Promise.all(
-        projectProcesses.map(process => stopProcess(process.processId))
+        projectProcesses
+            .filter(item =>
+                ["starting", "running"].includes(
+                    item.status
+                )
+            )
+            .map(item =>
+                stopProcess(
+                    item.processId,
+                    userId
+                )
+            )
     );
+
+    return true;
+};
+
+export const stopSocketProcesses = async socketId => {
+    const socketProcesses =
+        [...processes.values()].filter(
+            item =>
+                item.socketId === String(socketId) &&
+                ["starting", "running"].includes(
+                    item.status
+                )
+        );
+
+    await Promise.all(
+        socketProcesses.map(item =>
+            stopProcess(
+                item.processId,
+                item.userId
+            )
+        )
+    );
+
+    return true;
+};
+
+export const cleanupFinishedProcesses = (
+    maxAge = 1000 * 60 * 30
+) => {
+    const now = Date.now();
+
+    for (const [
+        processId,
+        processInfo
+    ] of processes) {
+        if (
+            processInfo.finishedAt &&
+            now - processInfo.finishedAt > maxAge
+        ) {
+            processes.delete(processId);
+        }
+    }
 };
