@@ -6,67 +6,185 @@ import { useWorkspace } from "../context/WorkspaceContext";
 import { getFile,getFileTree } from "../features/file";
 import FileTree from "./FileTree";
 
-const FileExplorer=({ project })=>{
-    const { isDark }=useTheme();
-    const { openFile,clearOpenFiles }=useWorkspace();
+const FileExplorer=({project})=>{
+    const {isDark}=useTheme();
+    const {openFile,clearOpenFiles}=useWorkspace();
+
     const [fileTree,setFileTree]=useState([]);
     const [initialLoading,setInitialLoading]=useState(false);
     const [refreshing,setRefreshing]=useState(false);
-    const previousProjectIdRef=useRef(null);
 
-    const fetchFileTree=useCallback(async({ initial=false }={})=>{
-        if(!project?._id){
+    const previousProjectIdRef=useRef(null);
+    const requestIdRef=useRef(0);
+    const refreshTimerRef=useRef(null);
+
+    const fetchFileTree=useCallback(async({initial=false}={})=>{
+        const projectId=project?._id;
+
+        if(!projectId){
             setFileTree([]);
             return;
         }
-        initial?setInitialLoading(true):setRefreshing(true);
+
+        const requestId=++requestIdRef.current;
+
+        if(initial)setInitialLoading(true);
+        else setRefreshing(true);
+
         try{
-            const tree=await getFileTree(project._id);
+            const tree=await getFileTree(projectId);
+
+            if(requestId!==requestIdRef.current)return;
+
             setFileTree(Array.isArray(tree)?tree:[]);
         }catch(error){
+            if(requestId!==requestIdRef.current)return;
+
             console.error("Fetch file tree error:",error);
-            toast.error(error?.response?.data?.message||"Unable to refresh project files.");
+
+            toast.error(
+                error?.response?.data?.message||
+                "Unable to refresh project files."
+            );
         }finally{
-            setInitialLoading(false);
-            setRefreshing(false);
+            if(requestId===requestIdRef.current){
+                setInitialLoading(false);
+                setRefreshing(false);
+            }
         }
     },[project?._id]);
+
+    const scheduleRefresh=useCallback(()=>{
+        if(!project?._id)return;
+
+        if(refreshTimerRef.current){
+            clearTimeout(refreshTimerRef.current);
+        }
+
+        refreshTimerRef.current=setTimeout(()=>{
+            refreshTimerRef.current=null;
+            fetchFileTree({initial:false});
+        },150);
+    },[project?._id,fetchFileTree]);
 
     useEffect(()=>{
         const nextProjectId=project?._id||null;
         const previousProjectId=previousProjectIdRef.current;
+
         if(!nextProjectId){
             previousProjectIdRef.current=null;
             setFileTree([]);
             return;
         }
-        if(previousProjectId!==null&&previousProjectId!==nextProjectId){
+
+        if(
+            previousProjectId!==null&&
+            previousProjectId!==nextProjectId
+        ){
             clearOpenFiles();
         }
+
         previousProjectIdRef.current=nextProjectId;
         setFileTree([]);
-        fetchFileTree({ initial:true });
+
+        if(refreshTimerRef.current){
+            clearTimeout(refreshTimerRef.current);
+            refreshTimerRef.current=null;
+        }
+
+        fetchFileTree({initial:true});
     },[project?._id,fetchFileTree,clearOpenFiles]);
 
     useEffect(()=>{
-        const handleAIFileTreeChanged=event=>{
-            const eventProjectId=event.detail?.projectId;
+        const handleWorkspaceChanged=event=>{
+            const eventProjectId=String(
+                event?.detail?.projectId||""
+            );
+
             if(!project?._id)return;
-            if(eventProjectId&&eventProjectId!==project._id)return;
-            fetchFileTree({ initial:false });
+
+            if(
+                eventProjectId&&
+                eventProjectId!==String(project._id)
+            ){
+                return;
+            }
+
+            console.log(
+                `Workspace changed → refreshing ${project._id}`
+            );
+
+            scheduleRefresh();
         };
-        window.addEventListener("zs-code-file-tree-changed",handleAIFileTreeChanged);
-        return()=>window.removeEventListener("zs-code-file-tree-changed",handleAIFileTreeChanged);
-    },[project?._id,fetchFileTree]);
+
+        window.addEventListener(
+            "zs-code-workspace-changed",
+            handleWorkspaceChanged
+        );
+
+        return()=>{
+            window.removeEventListener(
+                "zs-code-workspace-changed",
+                handleWorkspaceChanged
+            );
+        };
+    },[project?._id,scheduleRefresh]);
+
+    useEffect(()=>{
+        const handleAIFileTreeChanged=event=>{
+            const eventProjectId=event?.detail?.projectId;
+
+            if(!project?._id)return;
+
+            if(
+                eventProjectId&&
+                String(eventProjectId)!==String(project._id)
+            ){
+                return;
+            }
+
+            scheduleRefresh();
+        };
+
+        window.addEventListener(
+            "zs-code-file-tree-changed",
+            handleAIFileTreeChanged
+        );
+
+        return()=>{
+            window.removeEventListener(
+                "zs-code-file-tree-changed",
+                handleAIFileTreeChanged
+            );
+        };
+    },[project?._id,scheduleRefresh]);
+
+    useEffect(()=>{
+        return()=>{
+            if(refreshTimerRef.current){
+                clearTimeout(refreshTimerRef.current);
+            }
+
+            requestIdRef.current++;
+        };
+    },[]);
 
     const handleOpenFile=async node=>{
         if(!node||node.type!=="file")return;
+
         try{
             const file=await getFile(node._id||node.id);
-            if(file)openFile(file);
+
+            if(file){
+                openFile(file);
+            }
         }catch(error){
             console.error("Open file error:",error);
-            toast.error(error?.response?.data?.message||"Unable to open file.");
+
+            toast.error(
+                error?.response?.data?.message||
+                "Unable to open file."
+            );
         }
     };
 
@@ -100,9 +218,10 @@ const FileExplorer=({ project })=>{
                     tree={fileTree}
                     projectId={project._id}
                     isDark={isDark}
-                    onRefresh={()=>fetchFileTree({ initial:false })}
+                    onRefresh={()=>fetchFileTree({initial:false})}
                     onOpenFile={handleOpenFile}
                 />
+
                 {refreshing&&(
                     <div className={`pointer-events-none absolute right-2 top-1 flex items-center gap-1.5 rounded-md border px-2 py-1 font-plex text-[9px] ${isDark?"border-white/10 bg-[#181818]/90 text-white/40":"border-black/10 bg-white/90 text-slate-400"}`}>
                         <FaSyncAlt className="animate-spin text-[8px]"/>

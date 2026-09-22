@@ -92,17 +92,12 @@ export const WorkspaceProvider=({children})=>{
             );
         };
 
-        window.addEventListener(
+        window.addEventListener("zs-code-file-tree-changed",syncAIFile);
+
+        return()=>window.removeEventListener(
             "zs-code-file-tree-changed",
             syncAIFile
         );
-
-        return()=>{
-            window.removeEventListener(
-                "zs-code-file-tree-changed",
-                syncAIFile
-            );
-        };
     },[]);
 
     const value=useMemo(()=>({

@@ -81,10 +81,19 @@ const Terminal = ({ isOpen, onClose, projectId, userId, aiOpen }) => {
             term.write(`\r\n\x1b[31m[Connection Error] ${error.message}\x1b[0m\r\n`);
         };
 
+        const handleWorkspaceChanged = payload => {
+            window.dispatchEvent(
+                new CustomEvent("zs-code-workspace-changed", {
+                    detail: payload
+                })
+            );
+        };
+
         socket.on("terminal:data", handleData);
         socket.on("terminal:ready", handleReady);
         socket.on("terminal:error", handleError);
         socket.on("connect_error", handleConnectError);
+        socket.on("workspace:changed", handleWorkspaceChanged);
 
         const inputDisposable = term.onData(data => {
             socket.emit("terminal:write", data);
