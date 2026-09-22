@@ -663,7 +663,7 @@ const Navbar = () => {
                                                     )
                                                 ) : (
                                                     <div
-                                                        className={`px-3 py-8 text-center text-xs ${isDark
+                                                        className={`font-plex px-3 py-8 text-center text-[17px] tracking-wider ${isDark
                                                             ? "text-white/40"
                                                             : "text-slate-400"
                                                             }`}
