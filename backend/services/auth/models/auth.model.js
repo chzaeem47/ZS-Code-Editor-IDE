@@ -50,6 +50,12 @@ const userSchema = new mongoose.Schema({
         default: false,
     },
 
+    credits:{
+        type:Number,
+        default:100,
+        min:0
+    }
+
 },{timestamps:true})
 
 export const userModel = mongoose.model("User",userSchema)

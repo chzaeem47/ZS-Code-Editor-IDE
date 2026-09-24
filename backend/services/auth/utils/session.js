@@ -14,6 +14,7 @@ export const createSession = async (user) => {
       email: user.email,
       _id: user._id,
       avatar: user.avatar || "",
+      credits:user.credits
     }),
     "EX",
     7 * 24 * 60 * 60

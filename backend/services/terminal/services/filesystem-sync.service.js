@@ -9,6 +9,8 @@ const syncTimers = new Map();
 const syncStates = new Map();
 
 const DEBOUNCE_MS = 700;
+const BINARY_PREFIX = "__ZS_BASE64__:";
+
 const IGNORED = new Set([
     "node_modules",
     ".git",
@@ -17,6 +19,37 @@ const IGNORED = new Set([
     "build",
     "coverage",
     ".turbo"
+]);
+
+const BINARY_EXTENSIONS = new Set([
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
+    "webp",
+    "avif",
+    "ico",
+    "bmp",
+    "tif",
+    "tiff",
+    "mp3",
+    "wav",
+    "ogg",
+    "m4a",
+    "aac",
+    "mp4",
+    "webm",
+    "mov",
+    "avi",
+    "woff",
+    "woff2",
+    "ttf",
+    "otf",
+    "eot",
+    "pdf",
+    "zip",
+    "gz",
+    "wasm"
 ]);
 
 const safePath = (root, relativePath) => {
@@ -31,6 +64,21 @@ const safePath = (root, relativePath) => {
     }
 
     return target;
+};
+
+const isBinaryFile = filePath => {
+    const extension = path.extname(filePath).slice(1).toLowerCase();
+    return BINARY_EXTENSIONS.has(extension);
+};
+
+const readFileContent = async fullPath => {
+    const buffer = await fs.readFile(fullPath);
+
+    if (isBinaryFile(fullPath)) {
+        return `${BINARY_PREFIX}${buffer.toString("base64")}`;
+    }
+
+    return buffer.toString("utf8");
 };
 
 const buildTree = async (root, directory = root, relative = "") => {
@@ -63,7 +111,7 @@ const buildTree = async (root, directory = root, relative = "") => {
 
         if (entry.isFile()) {
             try {
-                const content = await fs.readFile(fullPath, "utf8");
+                const content = await readFileContent(fullPath);
 
                 tree.push({
                     name: entry.name,
@@ -127,7 +175,8 @@ const syncToDatabase = async ({
     }
 
     return {
-        data , tree
+        data,
+        tree
     };
 };
 
@@ -281,25 +330,11 @@ export const startFilesystemWatcher = async ({
         });
     };
 
-    watcher.on("add", filePath =>
-        changed("add", filePath)
-    );
-
-    watcher.on("change", filePath =>
-        changed("change", filePath)
-    );
-
-    watcher.on("unlink", filePath =>
-        changed("unlink", filePath)
-    );
-
-    watcher.on("addDir", filePath =>
-        changed("addDir", filePath)
-    );
-
-    watcher.on("unlinkDir", filePath =>
-        changed("unlinkDir", filePath)
-    );
+    watcher.on("add", filePath => changed("add", filePath));
+    watcher.on("change", filePath => changed("change", filePath));
+    watcher.on("unlink", filePath => changed("unlink", filePath));
+    watcher.on("addDir", filePath => changed("addDir", filePath));
+    watcher.on("unlinkDir", filePath => changed("unlinkDir", filePath));
 
     watcher.on("error", error => {
         console.error(
