@@ -1,14 +1,15 @@
 import { useEffect } from "react";
+
 import {
     FaLinkedin,
     FaGithub,
     FaCode,
 } from "react-icons/fa";
+
 import { SiFiverr } from "react-icons/si";
 import { CiCircleList } from "react-icons/ci";
 import { FaPhoenixFramework } from "react-icons/fa6";
 import { GiRobotLeg } from "react-icons/gi";
-import { VscTools } from "react-icons/vsc";
 import { GoTools } from "react-icons/go";
 
 import { useTheme } from "../context/ThemeContext";
@@ -40,6 +41,8 @@ const DocumentPopup = ({ isOpen, onClose }) => {
         "HTML",
         "CSS",
         "JavaScript",
+        "React.js support",
+        "Next.js support",
         "Project & file management",
         "Code editor",
         "Live Preview",
@@ -53,15 +56,15 @@ const DocumentPopup = ({ isOpen, onClose }) => {
             icon: FaCode,
             title: "More Languages",
             description:
-                "Expand beyond HTML, CSS and JavaScript with support for additional programming languages.",
+                "Expand beyond web technologies with support for additional programming languages and development environments.",
             color: "text-cyan-400",
             hover: "group-hover:text-cyan-300",
         },
         {
             icon: FaPhoenixFramework,
-            title: "Framework Support",
+            title: "Git & GitHub Integration",
             description:
-                "Bring modern frameworks and libraries into the ZS Code development workflow.",
+                "Connect your GitHub account directly with ZS Code and manage repositories, commits and code pushes from your workspace.",
             color: "text-red-500",
             hover: "group-hover:text-purple-300",
         },
@@ -69,7 +72,7 @@ const DocumentPopup = ({ isOpen, onClose }) => {
             icon: GiRobotLeg,
             title: "Smarter AI",
             description:
-                "Improve the AI coding experience with better generation, understanding and project assistance.",
+                "Improve the AI coding experience with better generation, project understanding, debugging and development assistance.",
             color: "text-amber-400",
             hover: "group-hover:text-amber-300",
         },
@@ -77,7 +80,7 @@ const DocumentPopup = ({ isOpen, onClose }) => {
             icon: GoTools,
             title: "Developer Tools",
             description:
-                "Add more tools for debugging, testing, project management and development workflows.",
+                "Add more tools for debugging, testing, version control and modern software development workflows.",
             color: "text-emerald-400",
             hover: "group-hover:text-emerald-300",
         },
@@ -94,16 +97,18 @@ const DocumentPopup = ({ isOpen, onClose }) => {
         >
             {/* Overlay */}
             <div
-                className={`absolute inset-0 backdrop-blur-md ${isDark ? "bg-black/70" : "bg-black/40"
-                    }`}
+                className={`absolute inset-0 backdrop-blur-md ${
+                    isDark ? "bg-black/70" : "bg-black/40"
+                }`}
             />
 
             {/* Popup */}
             <div
-                className={`relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border p-1 shadow-2xl ${isDark
+                className={`relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border p-1 shadow-2xl ${
+                    isDark
                         ? "border-white/10 bg-[#181818] text-white"
                         : "border-black/10 bg-white text-[#181818]"
-                    }`}
+                }`}
             >
                 {/* Mac Controls */}
                 <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
@@ -112,17 +117,20 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                         aria-label="Close"
                         className="h-3 w-3 rounded-full bg-red-500 transition-transform duration-200 hover:scale-125"
                     />
+
                     <button
                         onClick={onClose}
                         aria-label="Minimize"
                         className="h-3 w-3 rounded-full bg-yellow-400 transition-transform duration-200 hover:scale-125"
                     />
+
                     <button
                         onClick={onClose}
                         aria-label="Maximize"
                         className="h-3 w-3 rounded-full bg-green-500 transition-transform duration-200 hover:scale-125"
                     />
                 </div>
+
                 {/* Scrollable Content */}
                 <div className="overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     <div className="px-6 py-9 sm:px-10 sm:py-10">
@@ -130,36 +138,37 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                         {/* Hero */}
                         <div className="text-center">
                             <p
-                                className={`font-plex mb-5 text-[14px] font-medium uppercase tracking-[0.3em] ${isDark
-                                    ? "text-white/40"
-                                    : "text-slate-400"
-                                    }`}
+                                className={`font-plex mb-5 text-[14px] font-medium uppercase tracking-[0.3em] ${
+                                    isDark ? "text-white/40" : "text-slate-400"
+                                }`}
                             >
                                 Developer Workspace
                             </p>
 
                             <h1
-                                className={`text-5xl font-tangerine font-extrabold tracking-widest sm:text-5xl ${isDark
-                                    ? "bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-pink-500 via-purple-600 via-blue-500 via-cyan-400 to-emerald-400 bg-clip-text text-transparent"
-                                    : "text-[#181818]"
-                                    }`}
+                                className={`text-5xl font-tangerine font-extrabold tracking-widest sm:text-5xl ${
+                                    isDark
+                                        ? "bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-pink-500 via-purple-600 via-blue-500 via-cyan-400 to-emerald-400 bg-clip-text text-transparent"
+                                        : "text-[#181818]"
+                                }`}
                             >
                                 ZS CODE{" "}
                                 <span className="text-blue-600">
-                                    V{""}
+                                    V
                                 </span>
-                                <span className="text-4xl font-serif ml-1">1.0</span>
+                                <span className="text-4xl font-serif ml-1">
+                                    1.0
+                                </span>
                             </h1>
 
                             <p
-                                className={`mx-auto mt-4 max-w-2xl text-sm leading-7 font-plex tracking-wider sm:text-[15px] ${isDark
-                                    ? "text-white/50"
-                                    : "text-slate-600"
-                                    }`}
+                                className={`mx-auto mt-4 max-w-2xl text-sm leading-7 font-plex tracking-wider sm:text-[15px] ${
+                                    isDark ? "text-white/50" : "text-slate-600"
+                                }`}
                             >
                                 ZS Code is a developer workspace built to
-                                bring coding projects AI assistance and
-                                development tools together in one place
+                                bring coding projects, AI assistance and
+                                development tools together in one place.
                             </p>
                         </div>
 
@@ -167,10 +176,11 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                         <section className="mt-10">
                             <div className="mb-4">
                                 <p
-                                    className={`text-[15px] font-semibold italic font-plex uppercase tracking-[0.15em] ${isDark
-                                        ? "text-blue-400"
-                                        : "text-purple-700"
-                                        }`}
+                                    className={`text-[15px] font-semibold italic font-plex uppercase tracking-[0.15em] ${
+                                        isDark
+                                            ? "text-blue-400"
+                                            : "text-purple-700"
+                                    }`}
                                 >
                                     Current Capabilities
                                 </p>
@@ -182,11 +192,17 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                                         key={feature}
                                         className="font-plex tracking-wider group flex items-center gap-2.5 transition-all duration-300 hover:translate-x-1"
                                     >
-                                        <CiCircleList size={25} className="text-blue-400" />
+                                        <CiCircleList
+                                            size={25}
+                                            className="text-blue-400"
+                                        />
 
                                         <span
-                                            className={`text-sm font-medium transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:via-blue-400 group-hover:to-violet-400 group-hover:bg-clip-text group-hover:text-transparent ${isDark ? "text-white/75" : "text-slate-700"
-                                                }`}
+                                            className={`text-sm font-medium transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:via-blue-400 group-hover:to-violet-400 group-hover:bg-clip-text group-hover:text-transparent ${
+                                                isDark
+                                                    ? "text-white/75"
+                                                    : "text-slate-700"
+                                            }`}
                                         >
                                             {feature}
                                         </span>
@@ -197,21 +213,24 @@ const DocumentPopup = ({ isOpen, onClose }) => {
 
                         {/* Current V1.0 Note */}
                         <div
-                            className={`mt-7 rounded-xl border p-4 ${isDark
-                                ? "border-purple-400/10 bg-blue-500/70"
-                                : "border-purple-200 bg-purple-50"
-                                }`}
+                            className={`mt-7 rounded-xl border p-4 ${
+                                isDark
+                                    ? "border-purple-400/10 bg-blue-500/70"
+                                    : "border-purple-200 bg-purple-50"
+                            }`}
                         >
                             <p
-                                className={`font-plex tracking-wider text-sm leading-6 ${isDark
-                                    ? "text-white"
-                                    : "text-slate-600"
-                                    }`}
+                                className={`font-plex tracking-wider text-sm leading-6 ${
+                                    isDark
+                                        ? "text-white"
+                                        : "text-slate-600"
+                                }`}
                             >
-                                ZS Code currently focuses on web development
-                                with HTML CSS and JavaScript together with
-                                its editor project workspace preview
-                                terminal and AI-powered workflow
+                                ZS Code currently focuses on modern web
+                                development with HTML, CSS, JavaScript,
+                                React.js and Next.js, together with its
+                                editor, project workspace, live preview,
+                                terminal and AI-powered development workflow.
                             </p>
                         </div>
 
@@ -219,73 +238,93 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                         <section className="mt-10">
                             <div className="mb-5">
                                 <h2
-                                    className={`font-plex italic mt-1 text-xl font-semibold ${isDark
-                                        ? "text-white"
-                                        : "text-slate-900"
-                                        }`}
+                                    className={`font-plex italic mt-1 text-xl font-semibold ${
+                                        isDark
+                                            ? "text-white"
+                                            : "text-slate-900"
+                                    }`}
                                 >
                                     ~ Coming Next
                                 </h2>
                             </div>
 
                             <div className="space-y-6">
-                                {upcomingFeatures.map(({ icon: Icon, title, description, color, hover }) => (
-                                    <div
-                                        key={title}
-                                        className="group flex gap-4"
-                                    >
+                                {upcomingFeatures.map(
+                                    ({
+                                        icon: Icon,
+                                        title,
+                                        description,
+                                        color,
+                                        hover,
+                                    }) => (
                                         <div
-                                            className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center transition-all duration-300 ${color} ${hover}`}
+                                            key={title}
+                                            className="group flex gap-4"
                                         >
-                                            <Icon size={35} strokeWidth={1.7} />
-                                        </div>
-
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <h3
-                                                    className={`font-plex text-[18px] font-semibold tracking-wider transition-colors ${isDark
-                                                        ? "text-white/85 group-hover:text-white"
-                                                        : "text-slate-800 group-hover:text-slate-950"
-                                                        }`}
-                                                >
-                                                    {title}
-                                                </h3>
-
-                                                <span
-                                                    className={`font-plex text-[11px] font-medium italic uppercase tracking-[0.16em] ${isDark ? "text-white/35" : "text-slate-400"
-                                                        }`}
-                                                >
-                                                    Planned
-                                                </span>
+                                            <div
+                                                className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center transition-all duration-300 ${color} ${hover}`}
+                                            >
+                                                <Icon
+                                                    size={35}
+                                                    strokeWidth={1.7}
+                                                />
                                             </div>
 
-                                            <p
-                                                className={`font-serif mt-1.5 max-w-xl text-[13px] leading-6 tracking-wider ${isDark
-                                                    ? "text-white/60"
-                                                    : "text-slate-500"
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <h3
+                                                        className={`font-plex text-[18px] font-semibold tracking-wider transition-colors ${
+                                                            isDark
+                                                                ? "text-white/85 group-hover:text-white"
+                                                                : "text-slate-800 group-hover:text-slate-950"
+                                                        }`}
+                                                    >
+                                                        {title}
+                                                    </h3>
+
+                                                    <span
+                                                        className={`font-plex text-[11px] font-medium italic uppercase tracking-[0.16em] ${
+                                                            isDark
+                                                                ? "text-cyan-400"
+                                                                : "text-slate-400"
+                                                        }`}
+                                                    >
+                                                        Planned
+                                                    </span>
+                                                </div>
+
+                                                <p
+                                                    className={`font-serif mt-1.5 max-w-xl text-[13px] leading-6 tracking-wider ${
+                                                        isDark
+                                                            ? "text-white/60"
+                                                            : "text-slate-500"
                                                     }`}
-                                            >
-                                                {description}
-                                            </p>
+                                                >
+                                                    {description}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                )}
                             </div>
                         </section>
 
                         {/* Founder */}
                         <section className="mt-11 text-center">
                             <div
-                                className={`mx-auto mb-10 h-px w-80 ${isDark
-                                    ? "bg-gradient-to-r from-transparent via-blue-400 to-transparent"
-                                    : "bg-gradient-to-r from-transparent via-slate-300 to-transparent"
-                                    }`}
+                                className={`mx-auto mb-10 h-px w-80 ${
+                                    isDark
+                                        ? "bg-gradient-to-r from-transparent via-blue-400 to-transparent"
+                                        : "bg-gradient-to-r from-transparent via-slate-300 to-transparent"
+                                }`}
                             />
+
                             <p
-                                className={`text-[20px] font-bold italic font-medium tracking-[0.2rem] bg-gradient-to-r ${isDark
-                                    ? "from-[#f8be02] via-[#ffc927] to-[#ffb700]"
-                                    : "from-[#A67C00] via-[#D4AF37] to-[#8C6500]"
-                                    } bg-clip-text text-transparent`}
+                                className={`text-[20px] font-bold italic font-medium tracking-[0.2rem] bg-gradient-to-r ${
+                                    isDark
+                                        ? "from-[#f8be02] via-[#ffc927] to-[#ffb700]"
+                                        : "from-[#A67C00] via-[#D4AF37] to-[#8C6500]"
+                                } bg-clip-text text-transparent`}
                             >
                                 Founder of ZS Code
                             </p>
@@ -296,31 +335,39 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                                     <img
                                         src="/sign.png"
                                         alt="Muhammad Zaeem Ahmad signature"
-                                        className={`invert-100 w-38 sm:w-55 object-contain ${isDark ? "opacity-90" : "opacity-80"
-                                            }`}
+                                        className={`invert-100 w-38 sm:w-55 object-contain ${
+                                            isDark ? "opacity-90" : "opacity-80"
+                                        }`}
                                     />
                                 </div>
 
                                 {/* Vertical divider */}
                                 <div
-                                    className={`h-16 w-px ${isDark
-                                        ? "bg-gradient-to-b from-transparent via-[#C9A227]/50 to-transparent"
-                                        : "bg-gradient-to-b from-transparent via-[#C9A227]/40 to-transparent"
-                                        }`}
+                                    className={`h-16 w-px ${
+                                        isDark
+                                            ? "bg-gradient-to-b from-transparent via-[#C9A227]/50 to-transparent"
+                                            : "bg-gradient-to-b from-transparent via-[#C9A227]/40 to-transparent"
+                                    }`}
                                 />
 
                                 {/* Name + Role */}
                                 <div className="text-left">
                                     <h2
-                                        className={`font-plex text-xl font-semibold tracking-wide sm:text-2xl ${isDark ? "text-white" : "text-slate-900"
-                                            }`}
+                                        className={`font-plex text-xl font-semibold tracking-wide sm:text-2xl ${
+                                            isDark
+                                                ? "text-white"
+                                                : "text-slate-900"
+                                        }`}
                                     >
                                         Muhammad Zaeem Ahmad
                                     </h2>
 
                                     <p
-                                        className={`font-cookie mt-1 text-sm ${isDark ? "text-blue-400" : "text-slate-500"
-                                            }`}
+                                        className={`font-cookie mt-1 text-sm ${
+                                            isDark
+                                                ? "text-blue-400"
+                                                : "text-slate-500"
+                                        }`}
                                     >
                                         AI-Powered Full-Stack Developer
                                     </p>
@@ -328,15 +375,16 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                             </div>
 
                             <p
-                                className={`font-plex tracking-wider mx-auto mt-4 max-w-xl text-sm leading-6 ${isDark
-                                    ? "text-white/40"
-                                    : "text-slate-500"
-                                    }`}
+                                className={`font-plex tracking-wider mx-auto mt-4 max-w-xl text-sm leading-6 ${
+                                    isDark
+                                        ? "text-white/40"
+                                        : "text-slate-500"
+                                }`}
                             >
-                                Building ZS Code as a developer focused
+                                Building ZS Code as a developer-focused
                                 platform for creating and managing modern
                                 software projects with AI-powered development
-                                workflows
+                                workflows.
                             </p>
 
                             {/* Social Links */}
@@ -358,10 +406,11 @@ const DocumentPopup = ({ isOpen, onClose }) => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="GitHub"
-                                    className={`group flex h-10 w-15 items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-1 ${isDark
-                                        ? "bg-[#2c2b2b] text-white"
-                                        : "bg-[#18181B] text-white"
-                                        }`}
+                                    className={`group flex h-10 w-15 items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-1 ${
+                                        isDark
+                                            ? "bg-[#2c2b2b] text-white"
+                                            : "bg-[#18181B] text-white"
+                                    }`}
                                 >
                                     <FaGithub size={30} />
                                 </a>
