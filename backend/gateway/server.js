@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import proxy from "express-http-proxy";
 
-import {protect} from "../services/auth/middlewares/protect.js";
+import {protect} from "./middlewares/protect.js";
 
 import {proxyWithHeader} from "../shared/proxyWIthHeader.js";
 
