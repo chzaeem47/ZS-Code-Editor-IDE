@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     FaChevronDown, FaSun, FaMoon, FaSignOutAlt, FaFolder, FaHome,
-    FaCode, FaDesktop, FaStar, FaTrash, FaCheck, FaMagic, FaTerminal,
-    FaFileAlt
+    FaCode, FaDesktop, FaStar, FaTrash, FaCheck, FaTerminal,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
@@ -817,6 +816,7 @@ const Navbar = () => {
                                 <FaDesktop className="text-[17px]" />
                                 Preview
                             </button>
+
                             <button
                                 type="button"
                                 onClick={() => {
@@ -953,7 +953,7 @@ const Navbar = () => {
                                         setOpen(prev => !prev)
                                     }
                                     className={`font-plex flex h-11 items-center gap-2 rounded-md border px-1.5 py-1.5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] sm:h-10 sm:gap-2.5 sm:pl-1.5 sm:pr-3 ${isDark
-                                        ? "border-white/20 bg-gradient-to-r from-[#0a1768] via-[#120bd1] to-[#0a1768]/90 text-white"
+                                        ? "bg-gradient-to-r from-[#0a1768] via-[#120bd1] to-[#0a1768]/90 text-white"
                                         : "border-indigo-200/80 bg-gradient-to-r from-[#0212f1] via-[#04bef1] to-[#0212f1] text-white"
                                         }`}
                                 >
