@@ -100,6 +100,9 @@ app.use("/api/ai",protect,
     )
 );
 
+app.get("/",(req,res)=>{
+    res.json({message:"Gateway is Healthy"})
+})
 
 app.listen(port,() => {
         
